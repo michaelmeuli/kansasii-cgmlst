@@ -56,5 +56,5 @@ differences, logarithmic edge length (`--linear` to switch), MST ties broken tow
 - Nearly every isolate has a unique profile, so nodes are single genomes and MST edge labels are large
   (tens to hundreds of alleles); this reflects strong recombination in the complex, and allele distances are not recombination-filtered.
 - ATCC 12478 carries unusual alleles; it is only the Prodigal training source and a seed genome.
-- Hub regions have crowded edge labels; use the PDF to zoom.
+- Hub regions have crowded edge labels; use the PDF to zoom. Node labels sit in a box in their species colour and are joined to their node by a dotted leader line (labels are pushed apart automatically, so they do not always touch the node).
 - The cgMLST is defined at the complex level, so between-species distances (thousands of alleles) rest on loci conserved across species.

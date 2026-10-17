@@ -122,7 +122,9 @@ for name in [args.subset] if args.subset else SUBSETS:
     def label(g: list[str]) -> str:
         names = [s.replace("Mkan329-", "") for s in g]
         return ", ".join(names) if len(g) <= 3 else f"{', '.join(names[:2])} +{len(g) - 2}"
-    texts = [ax.text(pos[i][0], pos[i][1] + radius(G.nodes[i]["n"]) + 0.6 * r0, label(g), fontsize=6, ha="center", va="bottom", zorder=4)
+    texts = [ax.text(pos[i][0], pos[i][1] + radius(G.nodes[i]["n"]) + 0.6 * r0, label(g), fontsize=6, ha="center", va="bottom", zorder=4,
+                     bbox={"facecolor": "white", "alpha": 0.85, "pad": 0.8, "lw": 0.8,
+                           "edgecolor": SPECIES_COLORS.get(next(iter(G.nodes[i]["species"])), "#999999")})
              for i, g in enumerate(groups)]
     pad = 0.06 * span
     ax.set_xlim(xy[:, 0].min() - pad, xy[:, 0].max() + pad)
@@ -137,6 +139,20 @@ for name in [args.subset] if args.subset else SUBSETS:
                  f"{len(D)} genomes, {k} types; distance = allele differences, pairwise deletion of missing loci; "
                  f"{'linear' if args.linear else 'logarithmic'} edge scale; dashed ring = public reference genome", fontsize=10)
     fig.tight_layout(rect=(0, 0, 1, 0.95))
+    # leader lines: join every label that is not touching its node to the node edge (labels are moved by adjust_text)
+    fig.canvas.draw()
+    inv = ax.transData.inverted()
+    for i, txt in enumerate(texts):
+        bb = txt.get_window_extent()
+        cen = np.asarray(ax.transData.transform(pos[i]), dtype=float)
+        rad = float(np.hypot(*(ax.transData.transform((pos[i][0] + radius(G.nodes[i]["n"]), pos[i][1])) - cen)))
+        nearest = np.array([min(max(cen[0], bb.x0), bb.x1), min(max(cen[1], bb.y0), bb.y1)])
+        gap = float(np.hypot(*(nearest - cen)))
+        if gap > rad + 3:
+            start = cen + (nearest - cen) / gap * rad
+            (x0, y0), (x1, y1) = inv.transform([tuple(start), tuple(nearest)])
+            ax.add_line(Line2D([x0, x1], [y0, y1], color=SPECIES_COLORS.get(next(iter(G.nodes[i]["species"])), "#444444"),
+                               lw=0.9, ls=(0, (1.5, 1.5)), zorder=3.5))  # dotted, so it is not mistaken for a tree edge
     for ext in ("png", "pdf"):
         fig.savefig(MST / f"mst_cgmlst_{name}.{ext}", dpi=200)
     plt.close(fig)
