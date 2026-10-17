@@ -41,9 +41,19 @@ def find_overlaps(pos: Pos, edges: Edges, radii: npt.NDArray[np.float64], margin
 
 
 def resolve_overlaps(pos: Pos, edges: Edges, radii: npt.NDArray[np.float64], margin: float,
-                     max_iter: int = 2000) -> tuple[Pos, int]:
-    """Nudge nodes off non-incident edges and off each other; returns (new positions, overlaps left)."""
+                     max_iter: int = 2000, max_scale: int = 25) -> tuple[Pos, int]:
+    """Nudge nodes off non-incident edges and off each other; returns (new positions, overlaps left). If nudging alone
+    gets stuck in a crowded area, the whole layout is enlarged by 4 % about its centroid (up to max_scale times)."""
     pos = pos.copy()
+    for _ in range(max_scale + 1):
+        pos, left = _nudge(pos, edges, radii, margin, max_iter)
+        if left == 0:
+            return pos, 0
+        pos = pos.mean(axis=0) + (pos - pos.mean(axis=0)) * 1.04
+    return pos, left
+
+
+def _nudge(pos: Pos, edges: Edges, radii: npt.NDArray[np.float64], margin: float, max_iter: int) -> tuple[Pos, int]:
     for _ in range(max_iter):
         on_edge, touching = find_overlaps(pos, edges, radii, margin)
         if not on_edge and not touching:

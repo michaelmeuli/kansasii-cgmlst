@@ -23,13 +23,15 @@ for r in s[s.keep].itertuples():
     src = ASSEMBLIES / f"{r.sample}.fasta"
     assert src.exists(), src
     link(src, GENOMES / f"{r.sample}.fasta")
-    rows.append({"sample": r.sample, "NR": r.NR, "species": r.species, "source": str(src), "is_reference": False})
+    rows.append({"sample": r.sample, "NR": r.NR, "species": r.species, "label": r.label,
+                 "is_control": bool(r.label), "source": str(src), "is_reference": False})
 for acc, sp in REFERENCES.items():
     src = GTDB_REPS / f"{acc}_query.fasta"
     assert src.exists(), src
     link(src, GENOMES / f"{acc}.fasta")
     link(src, SEEDS / f"{acc}.fasta")
-    rows.append({"sample": acc, "NR": None, "species": sp, "source": str(src), "is_reference": True})
+    rows.append({"sample": acc, "NR": None, "species": sp, "label": "", "is_control": False,
+                 "source": str(src), "is_reference": True})
 df = pd.DataFrame(rows)
 df.to_csv(OUT / "samples.tsv", sep="\t", index=False)
 print(f"{len(df)} genomes ({int(df.is_reference.sum())} references); species:\n{df.species.value_counts().to_string()}")

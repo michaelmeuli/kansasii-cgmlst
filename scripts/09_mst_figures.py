@@ -75,7 +75,8 @@ for name in [args.subset] if args.subset else SUBSETS:
     G = nx.Graph()
     for i, g in enumerate(groups):
         sp = samples.loc[g, "species"].value_counts()
-        G.add_node(i, n=len(g), species=sp.to_dict(), ref=bool(samples.loc[g, "is_reference"].any()))
+        G.add_node(i, n=len(g), species=sp.to_dict(), ref=bool(samples.loc[g, "is_reference"].any()),
+                   ctrl=[str(x) for x in samples.loc[g, "label"].fillna("") if x])
     for i, j, w in tree:
         G.add_edge(i, j, weight=w)
     assert nx.is_connected(G) and G.number_of_edges() == k - 1
@@ -129,12 +130,15 @@ for name in [args.subset] if args.subset else SUBSETS:
             ax.add_patch(Circle((x, y), r, fc="none", ec="black", lw=0.7, zorder=2))
         if G.nodes[i]["ref"]:  # public reference genome inside the node
             ax.add_patch(Circle((x, y), r * 1.25, fc="none", ec="black", lw=1.2, ls=(0, (2, 1)), zorder=2))
-    # labels: sample number(s) for small nodes, "n=" for big ones; references by accession
-    def label(g: list[str]) -> str:
-        names = [s.replace("Mkan329-", "") for s in g]
-        return ", ".join(names) if len(g) <= 3 else f"{', '.join(names[:2])} +{len(g) - 2}"
-    texts = [ax.text(pos[i][0], pos[i][1] + radius(G.nodes[i]["n"]) + 0.6 * r0, label(g), fontsize=6, ha="center", va="bottom", zorder=4,
-                     bbox={"facecolor": "white", "alpha": 0.85, "pad": 0.8, "lw": 0.8,
+    # labels: control strains by their LABEL (bold, thick frame), others by sample number(s) ("+n" for big nodes)
+    def label(i: int, g: list[str]) -> str:
+        names = [s.replace("Mkan329-", "") for s, c in zip(g, samples.loc[g, "label"].fillna("")) if not c]
+        others = ", ".join(names) if len(names) <= 3 else f"{', '.join(names[:2])} +{len(names) - 2}"
+        return "\n".join([*G.nodes[i]["ctrl"], *([others] if others else [])])
+    texts = [ax.text(pos[i][0], pos[i][1] + radius(G.nodes[i]["n"]) + 0.6 * r0, label(i, g), fontsize=7 if G.nodes[i]["ctrl"] else 6,
+                     fontweight="bold" if G.nodes[i]["ctrl"] else "normal", ha="center", va="bottom", zorder=4,
+                     bbox={"facecolor": "white", "alpha": 0.95 if G.nodes[i]["ctrl"] else 0.85, "pad": 1.5 if G.nodes[i]["ctrl"] else 0.8,
+                           "lw": 1.8 if G.nodes[i]["ctrl"] else 0.8,
                            "edgecolor": SPECIES_COLORS.get(next(iter(G.nodes[i]["species"])), "#999999")})
              for i, g in enumerate(groups)]
     pad = 0.06 * span
@@ -145,7 +149,10 @@ for name in [args.subset] if args.subset else SUBSETS:
     adjust_text(texts, x=xy[:, 0], y=xy[:, 1], objects=edge_txt, ax=ax, expand=(1.1, 1.3), iter_lim=300)
     present = sorted({s for _, d in G.nodes(data=True) for s in d["species"]})
     fig.legend(handles=[Line2D([], [], marker="o", ls="", mfc=SPECIES_COLORS.get(s, "#999999"), mec="black", markersize=9, label=s)
-                       for s in present], title="species", loc="lower right", frameon=False)
+                       for s in present]
+                + ([Line2D([], [], marker="*", ls="", mfc="none", mec="black", markersize=12, label="control strain (ATCC/DSM)")]
+                   if any(d["ctrl"] for _, d in G.nodes(data=True)) else []),
+               title="species", loc="lower right", frameon=False)
     fig.suptitle(f"{TITLES[name]}: minimum spanning tree of cgMLST allele profiles\n"
                  f"{len(D)} genomes, {k} types; distance = allele differences, pairwise deletion of missing loci; "
                  f"{'linear' if args.linear else 'logarithmic'} edge scale; dashed ring = public reference genome", fontsize=10)
@@ -159,6 +166,9 @@ for name in [args.subset] if args.subset else SUBSETS:
         rad = float(np.hypot(*(ax.transData.transform((pos[i][0] + radius(G.nodes[i]["n"]), pos[i][1])) - cen)))
         nearest = np.array([min(max(cen[0], bb.x0), bb.x1), min(max(cen[1], bb.y0), bb.y1)])
         gap = float(np.hypot(*(nearest - cen)))
+        if G.nodes[i]["ctrl"]:  # star ring around control strains (size from the node radius in pixels)
+            ax.scatter([pos[i][0]], [pos[i][1]], marker="*", s=(3.2 * rad * 72 / fig.dpi) ** 2, facecolors="none", edgecolors="black",
+                       linewidths=1.3, zorder=2.6)
         if gap > rad + 3:
             start = cen + (nearest - cen) / gap * rad
             (x0, y0), (x1, y1) = inv.transform([tuple(start), tuple(nearest)])
@@ -168,6 +178,7 @@ for name in [args.subset] if args.subset else SUBSETS:
         fig.savefig(MST / f"mst_cgmlst_{name}.{ext}", dpi=200)
     plt.close(fig)
     pd.DataFrame({"node": range(k), "n": sizes, "species": [",".join(G.nodes[i]["species"]) for i in range(k)],
+                  "control": ["; ".join(G.nodes[i]["ctrl"]) for i in range(k)],
                   "samples": [",".join(g) for g in groups]}).to_csv(MST / f"mst_nodes_{name}.tsv", sep="\t", index=False)
     print(f"{name}: {len(D)} genomes, {k} types, wrote mst_cgmlst_{name}.png/pdf "
           f"(min shared loci {int(shared.to_numpy().min())})")

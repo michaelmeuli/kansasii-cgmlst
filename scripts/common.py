@@ -44,13 +44,13 @@ MISSING_CODES = ("LNF", "NIPH", "NIPHEM", "ASM", "ALM", "PLOT3", "PLOT5", "LOTSC
 
 
 def load_samples() -> pd.DataFrame:
-    """Cohort genomes with columns sample, NR, species, keep (bool) and reason (why excluded, else '')."""
+    """Cohort genomes with columns sample, NR, species, label (LABEL of the ATCC/DSM control strains, else ''), keep (bool) and
+    reason (why excluded, else ''). Control strains of complex species are kept (unlike kansasii-mst); non-complex ones are not."""
     m = pd.read_csv(ROOT / "data/imm/screening_map_results.csv",
                     usecols=["NR", "PROBENNUMMER", "LABEL", "species", "contamination_flag"])
     reason = pd.Series("", index=m.index)
     reason[~m.species.isin(COMPLEX)] = "not in complex"
-    reason[m.LABEL.notna() & (reason == "")] = "control strain"
     reason[(m.contamination_flag == "contaminated") & (reason == "")] = "contaminated"
     reason[m.NR.isin(EXTRA_EXCL) & (reason == "")] = "low quality (manual)"
     return pd.DataFrame({"sample": m.PROBENNUMMER, "NR": m.NR, "species": m.species,
-                         "keep": reason == "", "reason": reason}).sort_values("NR").reset_index(drop=True)
+                         "label": m.LABEL.fillna(""), "keep": reason == "", "reason": reason}).sort_values("NR").reset_index(drop=True)

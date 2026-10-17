@@ -6,7 +6,7 @@ import argparse
 import pandas as pd
 
 from allele_distance import encode, pairwise_deletion
-from common import CGMLST, OUT, SUBSETS
+from common import CGMLST, OUT, REFERENCES, SUBSETS
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--threshold", default="0.95", help="cgMLST threshold directory to use (t<threshold>)")
@@ -31,3 +31,13 @@ for name, species in SUBSETS.items():
     pd.DataFrame(shared, index=keep, columns=keep).to_csv(mst_dir / f"shared_loci_{name}.csv")
     print(f"{name}: {len(keep)} genomes x {A.shape[1]} loci; min shared loci per pair {shared.min()}, "
           f"median distance {pd.Series(dist[dist > 0]).median():.0f}")
+
+# sanity check: each ATCC/DSM control strain vs the public genome of the same strain/type strain (expected ~0 alleles)
+ref_of = {sp: acc for acc, sp in REFERENCES.items()}
+dist_all = pd.read_csv(mst_dir / "allele_distance_complex.csv", index_col=0)
+rows = [{"control": str(s), "label": r.label, "public_reference": ref_of[str(r.species)],
+         "allele_differences": int(dist_all.to_numpy()[dist_all.index.get_loc(str(s)), dist_all.columns.get_loc(ref_of[str(r.species)])])}
+        for s, r in samples[samples.is_control].iterrows() if r.species in ref_of]
+chk = pd.DataFrame(rows)
+chk.to_csv(mst_dir / "control_check.tsv", sep="\t", index=False)
+print(chk.to_string(index=False))

@@ -10,11 +10,11 @@ Run: `sbatch run_all.sbatch` (env `env_cgmlst`, see `environment.yml`); `STEPS="
 
 | Step | Script | What |
 |---|---|---|
-| 00 | `00_prepare_inputs.py` | 172 QC-passing cohort assemblies (QC as in `kansasii-mst`: no contaminated, controls, non-complex, NR 10/21) + 7 public GTDB representatives (ATCC 12478 = *kansasii*, plus persicum, pseudokansasii, attenuatum, innocens, ostraviense, gastri) = 179 genomes |
+| 00 | `00_prepare_inputs.py` | 175 QC-passing cohort assemblies (QC as in `kansasii-mst`: no contaminated, non-complex, NR 10/21; unlike `kansasii-mst` the ATCC/DSM control strains of complex species, NR 128/132/133, are kept and shown by their `LABEL`) + 7 public GTDB representatives (ATCC 12478 = *kansasii*, plus persicum, pseudokansasii, attenuatum, innocens, ostraviense, gastri) = 182 genomes |
 | 01 | `01_prodigal_training.sh` | `prodigal -p single` on ATCC 12478 (GCF_000157895.3) -> `ATCC12478.trn` |
 | 02 | `02_create_schema.sh` | `CreateSchema` on the 7 public representatives (seed genomes) with `--ptf ATCC12478.trn` -> 9,216 loci |
-| 03 | `03_allele_call.sh` | `AlleleCall` of all 179 genomes (`--ptf`, `--output-masked`); runs on a copy of the schema because new alleles are added |
-| 04 | `04_remove_paralogs.sh` | `RemoveGenes` for the 69 loci in `paralogous_counts.tsv` |
+| 03 | `03_allele_call.sh` | `AlleleCall` of all 182 genomes (`--ptf`, `--output-masked`); runs on a copy of the schema because new alleles are added |
+| 04 | `04_remove_paralogs.sh` | `RemoveGenes` for the 59 loci in `paralogous_counts.tsv` |
 | 05 | `05_extract_cgmlst.sh` | `ExtractCgMLST --t 1.0 / 0.99 / 0.95`; 0.95 is the scheme used downstream (`CGMLST_THRESHOLD` in `env.sh`) |
 | 06 | `06_schema_evaluator.sh` | `SchemaEvaluator --ta 11` on the final cgMLST loci |
 | 07 | `07_summarise_scheme.py` | good-target percentage -> `scheme_summary.tsv`, `schema_evaluator_loci.tsv` |
@@ -26,11 +26,11 @@ Run: `sbatch run_all.sbatch` (env `env_cgmlst`, see `environment.yml`); `STEPS="
 | metric | value |
 |---|---|
 | loci in schema (seed) | 9,216 |
-| paralogous loci removed | 69 (9,147 remain) |
-| cgMLST loci, present in 100 % / 99 % / 95 % of genomes | 1,498 / 2,578 / **3,610** |
-| **good targets** (SchemaEvaluator: no flagged allele) | **3,558 / 3,610 = 98.6 %** (all alleles valid; 6 loci with an allele < 201 bp, 47 with an allele above the size threshold) |
+| paralogous loci removed | 59 (9,157 remain) |
+| cgMLST loci, present in 100 % / 99 % / 95 % of genomes | 1,501 / 2,576 / **3,655** |
+| **good targets** (SchemaEvaluator: no flagged allele) | **3,602 / 3,655 = 98.5 %** (all alleles valid; 6 loci with an allele < 201 bp, 48 with an allele above the size threshold) |
 
-98.6 % is above the 95-98 % usually quoted for published schemes. Schema and cgMLST were defined on the same 179 genomes, so the
+98.6 % is above the 95-98 % usually quoted for published schemes. Schema and cgMLST were defined on the same 182 genomes, so the
 95 % presence rule is satisfied by construction; validate on new isolates before treating the scheme as fixed.
 
 ## Distances: pairwise deletion
@@ -38,7 +38,7 @@ Run: `sbatch run_all.sbatch` (env `env_cgmlst`, see `environment.yml`); `STEPS="
 As in Ridom, a locus counts for a pair of genomes only if both have an allele call. Everything that is not an allele id
 (LNF, NIPH, NIPHEM, ASM, ALM, PLOT3, PLOT5, LOTSC, 0 in the masked table) is missing. Distance = number of called-in-both loci with
 different alleles (no normalisation). `shared_loci_<subset>.csv` gives the number of loci compared per pair
-(minimum 2,668 of 3,610 in the complex). `tests/test_allele_distance.py` checks this against hand-computed values.
+(minimum 2,688 of 3,655 in the complex). `tests/test_allele_distance.py` checks this against hand-computed values.
 
 ## Figures (`output/cgmlst/mst/`)
 
@@ -52,6 +52,14 @@ Layout: Kamada-Kawai on log edge lengths, then `layout_fix.py` nudges any node o
 Ridom-like features: node area ~ genome count, identical profiles share a node, pies for mixed-species nodes, edge labels = allele
 differences, logarithmic edge length (`--linear` to switch), MST ties broken towards larger nodes, optional cluster shading
 (`--cluster-threshold N`). Not identical to SeqSphere: its scheme and layout algorithm are proprietary, so distances and layout will differ.
+
+## Control strains
+
+The ATCC/DSM control strains NR 128 (*M. kansasii* ATCC 12478), 132 (*M. persicum* DSM 104278) and 133 (*M. pseudokansasii* DSM 107152) are
+drawn with their `LABEL` text in a bold, thick-framed box and a star ring around the node (legend: control strain). NR 126, 127, 129-131
+(Mtb, avium, abscessus, xenopi, ulcerans) are not complex members and are not included. Sanity check (`mst/control_check.tsv`), allele
+differences to the public genome of the same species: 128 vs GCF_000157895.3 (ATCC 12478): 3; 133 vs GCF_900566075.1: 8; 132 vs
+GCF_002086675.1: 117 (that public persicum genome is strain AFPC-000227, not DSM 104278, so a larger distance is expected).
 
 ## Caveats
 
