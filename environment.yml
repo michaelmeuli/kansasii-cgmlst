@@ -1,0 +1,16 @@
+name: env_cgmlst
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.11
+  - chewbbaca
+  - prodigal
+  - pandas
+  - numpy
+  - scipy
+  - matplotlib
+  - networkx
+  - adjusttext
+  - pytest

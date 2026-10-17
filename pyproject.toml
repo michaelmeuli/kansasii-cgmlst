@@ -1,0 +1,10 @@
+# Type-checking config only (analysis scripts, not a package).
+# Run: ~/data/conda/envs/env_typecheck/bin/mypy   (from the repo root)
+[tool.mypy]
+strict = true
+python_version = "3.11"
+files = ["scripts", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["networkx.*", "adjustText", "pytest"]
+ignore_missing_imports = true
