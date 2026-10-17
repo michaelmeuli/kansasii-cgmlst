@@ -17,6 +17,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Circle, Wedge
 
 from common import OUT, SPECIES_COLORS, SUBSETS
+from layout_fix import find_overlaps, resolve_overlaps
 
 TITLES = {"complex": "M. kansasii complex", "kansasii": "M. kansasii (sensu stricto)",
           "persicum": "M. persicum", "pseudokansasii": "M. pseudokansasii"}
@@ -89,6 +90,16 @@ for name in [args.subset] if args.subset else SUBSETS:
 
     def radius(n: int) -> float:
         return r0 * float(np.sqrt(n))
+
+    # no node may sit on an edge it does not belong to (nor on another node): nudge such nodes aside
+    edge_list = [(int(u), int(v)) for u, v in G.edges()]
+    radii = np.array([radius(G.nodes[i]["n"]) for i in range(k)])
+    before = sum(len(x) for x in find_overlaps(xy, edge_list, radii, 0.5 * r0))
+    xy, left = resolve_overlaps(xy, edge_list, radii, 0.5 * r0)
+    pos = {i: xy[i] for i in range(k)}
+    print(f"{name}: node overlaps {before} -> {left}")
+    if left:
+        print(f"WARNING {name}: {left} node/edge overlaps could not be resolved")
 
     fig, ax = plt.subplots(figsize=(16, 13) if k > 60 else (12, 10))
     ax.set_aspect("equal")

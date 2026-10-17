@@ -47,6 +47,8 @@ different alleles (no normalisation). `shared_loci_<subset>.csv` gives the numbe
   (each with its own public reference genome, if any). Distances are computed within the subset, so shared loci differ per figure.
 - `mst_nodes_<subset>.tsv`: node membership.
 
+Layout: Kamada-Kawai on log edge lengths, then `layout_fix.py` nudges any node off non-incident edges and off other nodes (0 overlaps left in all figures).
+
 Ridom-like features: node area ~ genome count, identical profiles share a node, pies for mixed-species nodes, edge labels = allele
 differences, logarithmic edge length (`--linear` to switch), MST ties broken towards larger nodes, optional cluster shading
 (`--cluster-threshold N`). Not identical to SeqSphere: its scheme and layout algorithm are proprietary, so distances and layout will differ.
