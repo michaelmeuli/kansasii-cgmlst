@@ -29,7 +29,9 @@ REFERENCES = {
 # one MST per subset: species to keep; None = every genome
 SUBSETS: dict[str, list[str] | None] = {
     "complex": None,
-    "kansasii_persicum_pseudokansasii": ["kansasii", "persicum", "pseudokansasii"],
+    "kansasii": ["kansasii"],
+    "persicum": ["persicum"],
+    "pseudokansasii": ["pseudokansasii"],
 }
 # same colours as kansasii-mst / mlsa-kansasii
 SPECIES_COLORS = {

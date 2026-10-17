@@ -43,7 +43,8 @@ different alleles (no normalisation). `shared_loci_<subset>.csv` gives the numbe
 ## Figures (`output/cgmlst/mst/`)
 
 - `mst_cgmlst_complex.{png,pdf}`: whole complex incl. the public references (dashed ring).
-- `mst_cgmlst_kansasii_persicum_pseudokansasii.{png,pdf}`: the three main species.
+- `mst_cgmlst_kansasii.{png,pdf}`, `mst_cgmlst_persicum.{png,pdf}`, `mst_cgmlst_pseudokansasii.{png,pdf}`: one MST per species
+  (each with its own public reference genome, if any). Distances are computed within the subset, so shared loci differ per figure.
 - `mst_nodes_<subset>.tsv`: node membership.
 
 Ridom-like features: node area ~ genome count, identical profiles share a node, pies for mixed-species nodes, edge labels = allele
@@ -52,7 +53,7 @@ differences, logarithmic edge length (`--linear` to switch), MST ties broken tow
 
 ## Caveats
 
-- Nearly every isolate has a unique profile (170 types for 171 genomes), so nodes are single genomes and MST edge labels are large
+- Nearly every isolate has a unique profile, so nodes are single genomes and MST edge labels are large
   (tens to hundreds of alleles); this reflects strong recombination in the complex, and allele distances are not recombination-filtered.
 - ATCC 12478 carries unusual alleles; it is only the Prodigal training source and a seed genome.
 - Hub regions have crowded edge labels; use the PDF to zoom.

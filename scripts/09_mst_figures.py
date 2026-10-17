@@ -18,7 +18,8 @@ from matplotlib.patches import Circle, Wedge
 
 from common import OUT, SPECIES_COLORS, SUBSETS
 
-TITLES = {"complex": "M. kansasii complex", "kansasii_persicum_pseudokansasii": "M. kansasii, M. persicum and M. pseudokansasii"}
+TITLES = {"complex": "M. kansasii complex", "kansasii": "M. kansasii (sensu stricto)",
+          "persicum": "M. persicum", "pseudokansasii": "M. pseudokansasii"}
 ap = argparse.ArgumentParser()
 ap.add_argument("--subset", choices=list(SUBSETS), default=None, help="only this subset (default: all)")
 ap.add_argument("--cluster-threshold", type=int, default=None,
@@ -84,7 +85,7 @@ for name in [args.subset] if args.subset else SUBSETS:
     pos = nx.kamada_kawai_layout(Gl, dist=dict(nx.all_pairs_dijkstra_path_length(Gl)))
     xy = np.array([pos[i] for i in range(k)])
     span = float(np.ptp(xy, axis=0).max()) or 1.0
-    r0 = 0.012 * span * (2.2 if k < 40 else 1.0)  # radius of a single-genome node (data units)
+    r0 = 0.012 * span * (1.4 if k < 40 else 1.0)  # radius of a single-genome node (data units)
 
     def radius(n: int) -> float:
         return r0 * float(np.sqrt(n))
@@ -130,12 +131,12 @@ for name in [args.subset] if args.subset else SUBSETS:
     fig.canvas.draw()
     adjust_text(texts, x=xy[:, 0], y=xy[:, 1], objects=edge_txt, ax=ax, expand=(1.1, 1.3), iter_lim=300)
     present = sorted({s for _, d in G.nodes(data=True) for s in d["species"]})
-    ax.legend(handles=[Line2D([], [], marker="o", ls="", mfc=SPECIES_COLORS.get(s, "#999999"), mec="black", markersize=9, label=s)
-                       for s in present], title="species", loc="upper left", frameon=False)
-    ax.set_title(f"{TITLES[name]}: minimum spanning tree of cgMLST allele profiles\n"
+    fig.legend(handles=[Line2D([], [], marker="o", ls="", mfc=SPECIES_COLORS.get(s, "#999999"), mec="black", markersize=9, label=s)
+                       for s in present], title="species", loc="lower right", frameon=False)
+    fig.suptitle(f"{TITLES[name]}: minimum spanning tree of cgMLST allele profiles\n"
                  f"{len(D)} genomes, {k} types; distance = allele differences, pairwise deletion of missing loci; "
                  f"{'linear' if args.linear else 'logarithmic'} edge scale; dashed ring = public reference genome", fontsize=10)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
     for ext in ("png", "pdf"):
         fig.savefig(MST / f"mst_cgmlst_{name}.{ext}", dpi=200)
     plt.close(fig)
