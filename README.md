@@ -68,3 +68,8 @@ GCF_002086675.1: 117 (that public persicum genome is strain AFPC-000227, not DSM
 - ATCC 12478 carries unusual alleles; it is only the Prodigal training source and a seed genome.
 - Hub regions have crowded edge labels; use the PDF to zoom. Node labels sit in a box in their species colour and are joined to their node by a dotted leader line (labels are pushed apart automatically, so they do not always touch the node).
 - The cgMLST is defined at the complex level, so between-species distances (thousands of alleles) rest on loci conserved across species.
+
+## Provenance
+
+The sbatch files write `MANIFEST.txt` (commit, clean/dirty flag, script, conda env hash, inputs) into the output
+directory when they finish; see `kansasii-docs/docs/PROVENANCE.md`. Project index: `kansasii-docs/README.md`.
