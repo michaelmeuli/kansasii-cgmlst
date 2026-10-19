@@ -15,3 +15,8 @@ for f in [0-9][0-9]_*; do
   echo "=== $f $(date +%T)"
   case "$f" in *.sh) bash "$f" ;; *.py) python "$f" ;; esac
 done
+
+# provenance (see kansasii-docs/docs/PROVENANCE.md)
+bash /shares/sander.imm.uzh/MM/kansasii/repos/kansasii-docs/bin/write_manifest.sh \
+  "/shares/sander.imm.uzh/MM/kansasii/output/cgmlst" \
+  /shares/sander.imm.uzh/MM/kansasii/repos/kansasii-cgmlst run_all.sbatch /shares/sander.imm.uzh/MM/kansasii/data/imm/screening_map_results.csv
