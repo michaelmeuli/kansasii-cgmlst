@@ -47,6 +47,8 @@ different alleles (no normalisation). `shared_loci_<subset>.csv` gives the numbe
 - `mst_cgmlst_complex.{png,pdf}`: whole complex incl. the public references (dashed ring).
 - `mst_cgmlst_kansasii.{png,pdf}`, `mst_cgmlst_persicum.{png,pdf}`, `mst_cgmlst_pseudokansasii.{png,pdf}`: one MST per species
   (each with its own public reference genome, if any). Distances are computed within the subset, so shared loci differ per figure.
+- `mst_cgmlst_persicum_attenuatum_ostraviense_innocens_gastri.{png,pdf}`: all non-kansasii, non-pseudokansasii species together (gastri = public reference only).
+- Node labels are sample IDs as `M001` (Mkan329-001).
 - `mst_nodes_<subset>.tsv`: node membership.
 
 Layout: Kamada-Kawai on log edge lengths, then `layout_fix.py` nudges any node off non-incident edges and off other nodes (0 overlaps left in all figures).

@@ -33,6 +33,7 @@ SUBSETS: dict[str, list[str] | None] = {
     "kansasii": ["kansasii"],
     "persicum": ["persicum"],
     "pseudokansasii": ["pseudokansasii"],
+    "persicum_attenuatum_ostraviense_innocens_gastri": ["persicum", "attenuatum", "ostraviense", "innocens", "gastri"],
 }
 # same colours as kansasii-mst / mlsa-kansasii
 SPECIES_COLORS = {

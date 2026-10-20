@@ -20,7 +20,8 @@ from common import OUT, SPECIES_COLORS, SUBSETS
 from layout_fix import find_overlaps, resolve_overlaps
 
 TITLES = {"complex": "M. kansasii complex", "kansasii": "M. kansasii (sensu stricto)",
-          "persicum": "M. persicum", "pseudokansasii": "M. pseudokansasii"}
+          "persicum": "M. persicum", "pseudokansasii": "M. pseudokansasii",
+          "persicum_attenuatum_ostraviense_innocens_gastri": "M. persicum, attenuatum, ostraviense, innocens and gastri"}
 ap = argparse.ArgumentParser()
 ap.add_argument("--subset", choices=list(SUBSETS), default=None, help="only this subset (default: all)")
 ap.add_argument("--cluster-threshold", type=int, default=None,
@@ -132,7 +133,7 @@ for name in [args.subset] if args.subset else SUBSETS:
             ax.add_patch(Circle((x, y), r * 1.25, fc="none", ec="black", lw=1.2, ls=(0, (2, 1)), zorder=2))
     # labels: control strains by their LABEL (bold, thick frame), others by sample number(s) ("+n" for big nodes)
     def label(i: int, g: list[str]) -> str:
-        names = [s.replace("Mkan329-", "") for s, c in zip(g, samples.loc[g, "label"].fillna("")) if not c]
+        names = [s.replace("Mkan329-", "M") for s, c in zip(g, samples.loc[g, "label"].fillna("")) if not c]
         others = ", ".join(names) if len(names) <= 3 else f"{', '.join(names[:2])} +{len(names) - 2}"
         return "\n".join([*G.nodes[i]["ctrl"], *([others] if others else [])])
     texts = [ax.text(pos[i][0], pos[i][1] + radius(G.nodes[i]["n"]) + 0.6 * r0, label(i, g), fontsize=7 if G.nodes[i]["ctrl"] else 6,
