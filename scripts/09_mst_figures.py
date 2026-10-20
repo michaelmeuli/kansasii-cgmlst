@@ -107,13 +107,16 @@ for name in [args.subset] if args.subset else SUBSETS:
         if not ncross:
             break
         xy = untangle(xy, edge_list, radii, 0.5 * r0)
+        print(f"DBG {name}: after untangle crossings {len(crossings(xy, edge_list))} overlaps {sum(len(x) for x in find_overlaps(xy, edge_list, radii, 0.5 * r0))}")
         xy, left = resolve_overlaps(xy, edge_list, radii, 0.5 * r0)
         ncross = len(crossings(xy, edge_list))
+        print(f"DBG {name}: after resolve crossings {ncross} left {left}")
     pos = {i: xy[i] for i in range(k)}
     print(f"{name}: node overlaps {before} -> {left}")
     print(f"{name}: edge crossings {ncross}")
     if ncross:
         print(f"WARNING {name}: {ncross} edge crossings could not be resolved")
+        print("  crossing edges (node ids):", [(edge_list[i], edge_list[j]) for i, j in crossings(xy, edge_list)])
     if left:
         print(f"WARNING {name}: {left} node/edge overlaps could not be resolved")
 

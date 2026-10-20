@@ -103,8 +103,8 @@ def crossings(pos: Pos, edges: Edges) -> list[tuple[int, int]]:
 
 
 def untangle(pos: Pos, edges: Edges, radii: npt.NDArray[np.float64], margin: float, max_iter: int = 50) -> Pos:
-    """Remove edge crossings of a tree layout by rotating (or mirroring) the subtree hanging off one end of a crossing edge about
-    its other end; edge lengths are kept. A move is taken when it lowers the number of crossings, ties broken by fewer node overlaps."""
+    """Remove edge crossings of a tree layout by rotating (or mirroring) the subtree hanging off one end of an edge about
+    its other end (crossing edges first, then any edge when stuck); edge lengths are kept. A move is taken when it lowers the number of crossings, ties broken by fewer node overlaps."""
     pos = pos.copy()
     nbr: dict[int, list[int]] = {}
     for u, v in edges:
@@ -126,12 +126,14 @@ def untangle(pos: Pos, edges: Edges, radii: npt.NDArray[np.float64], margin: flo
         return len(crossings(q, edges)), sum(len(x) for x in find_overlaps(q, edges, radii, margin))
 
     best = score(pos)
+    stuck = False
     for _ in range(max_iter):
         cross = crossings(pos, edges)
         if not cross:
             break
         improved = False
-        for ei in dict.fromkeys(e for pair in cross for e in pair):
+        # first pivot on the crossing edges themselves; if no move helps, on every edge of the tree
+        for ei in [*dict.fromkeys(e for pair in cross for e in pair), *(e for e in range(len(edges)) if stuck)]:
             for p, c in (edges[ei], edges[ei][::-1]):
                 nodes = subtree(p, c)
                 rel = pos[nodes] - pos[p]
@@ -152,5 +154,9 @@ def untangle(pos: Pos, edges: Edges, radii: npt.NDArray[np.float64], margin: flo
                             rel = pos[nodes] - pos[p]
                             axis = np.arctan2(*(pos[c] - pos[p])[::-1])
         if not improved:
-            break
+            if stuck:
+                break
+            stuck = True
+        else:
+            stuck = False
     return pos
