@@ -22,6 +22,7 @@ Run: `sbatch run_all.sbatch` (env `env_cgmlst`, see `environment.yml`); `STEPS="
 | 07 | `07_summarise_scheme.py` | good-target percentage -> `scheme_summary.tsv`, `schema_evaluator_loci.tsv` |
 | 08 | `08_distance_matrix.py` | pairwise-deletion allele distances (`allele_distance.py`) per subset |
 | 09 | `09_mst_figures.py` | MST figures |
+| 10 | `10_export_ridom.py` | `output/ridom_assemblies.tar.gz` for Ridom SeqSphere+: the same QC-passing cohort + 7 references as real FASTA files (`ridom/assemblies/`); isolates named `M001` (as in the MST labels), control strains by `LABEL` (`M_kansasii_ATCC_12478`, ...), references by accession; `ridom/metadata.tsv` (name, sample, species as `M. kansasii` ..., ST, CheckM, flags) for the isolate-data import. Written to `.part` and renamed when complete (~20 min, run via sbatch) |
 
 ## Scheme
 
