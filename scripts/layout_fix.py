@@ -79,3 +79,78 @@ def _nudge(pos: Pos, edges: Edges, radii: npt.NDArray[np.float64], margin: float
             pos[j] = pos[j] - d * push
     on_edge, touching = find_overlaps(pos, edges, radii, margin)
     return pos, len(on_edge) + len(touching)
+
+
+def crossings(pos: Pos, edges: Edges) -> list[tuple[int, int]]:
+    """Index pairs of edges that cross each other (edges sharing a node are not counted)."""
+    m = len(edges)
+    if m < 2:
+        return []
+    a = pos[[u for u, _ in edges]]
+    b = pos[[v for _, v in edges]]
+    d = b - a
+
+    def side(p: Pos) -> npt.NDArray[np.float64]:  # (m, m): side of point p[j] relative to the line of edge i
+        out: npt.NDArray[np.float64] = d[:, None, 0] * (p[None, :, 1] - a[:, None, 1]) - d[:, None, 1] * (p[None, :, 0] - a[:, None, 0])
+        return out
+
+    s1, s2 = side(a), side(b)  # edge j's end points vs edge i's line
+    hit = (s1 * s2 < 0) & (s1.T * s2.T < 0)
+    ends = np.array(edges)
+    share = (ends[:, None, :, None] == ends[None, :, None, :]).any(axis=(2, 3))
+    hit &= ~share
+    return [(int(i), int(j)) for i, j in zip(*np.nonzero(np.triu(hit, 1)))]
+
+
+def untangle(pos: Pos, edges: Edges, radii: npt.NDArray[np.float64], margin: float, max_iter: int = 50) -> Pos:
+    """Remove edge crossings of a tree layout by rotating (or mirroring) the subtree hanging off one end of a crossing edge about
+    its other end; edge lengths are kept. A move is taken when it lowers the number of crossings, ties broken by fewer node overlaps."""
+    pos = pos.copy()
+    nbr: dict[int, list[int]] = {}
+    for u, v in edges:
+        nbr.setdefault(u, []).append(v)
+        nbr.setdefault(v, []).append(u)
+
+    def subtree(p: int, c: int) -> list[int]:
+        seen, stack = {p, c}, [c]
+        out = [c]
+        while stack:
+            for w in nbr[stack.pop()]:
+                if w not in seen:
+                    seen.add(w)
+                    out.append(w)
+                    stack.append(w)
+        return out
+
+    def score(q: Pos) -> tuple[int, int]:
+        return len(crossings(q, edges)), sum(len(x) for x in find_overlaps(q, edges, radii, margin))
+
+    best = score(pos)
+    for _ in range(max_iter):
+        cross = crossings(pos, edges)
+        if not cross:
+            break
+        improved = False
+        for ei in dict.fromkeys(e for pair in cross for e in pair):
+            for p, c in (edges[ei], edges[ei][::-1]):
+                nodes = subtree(p, c)
+                rel = pos[nodes] - pos[p]
+                axis = np.arctan2(*(pos[c] - pos[p])[::-1])
+                for mirror in (False, True):
+                    for deg in range(5, 360, 5):
+                        th = np.radians(deg)
+                        r = rel
+                        if mirror:  # reflect about the line p-c, then rotate
+                            r = np.stack([np.cos(2 * axis) * rel[:, 0] + np.sin(2 * axis) * rel[:, 1],
+                                          np.sin(2 * axis) * rel[:, 0] - np.cos(2 * axis) * rel[:, 1]], axis=1)
+                        rot = np.array([[np.cos(th), -np.sin(th)], [np.sin(th), np.cos(th)]])
+                        cand = pos.copy()
+                        cand[nodes] = pos[p] + r @ rot.T
+                        s = score(cand)
+                        if s < best:
+                            best, pos, improved = s, cand, True
+                            rel = pos[nodes] - pos[p]
+                            axis = np.arctan2(*(pos[c] - pos[p])[::-1])
+        if not improved:
+            break
+    return pos

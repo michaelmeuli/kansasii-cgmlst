@@ -21,7 +21,7 @@ from matplotlib.text import Text
 
 from common import OUT, SPECIES_COLORS, SUBSETS
 from label_fix import place_labels
-from layout_fix import find_overlaps, resolve_overlaps
+from layout_fix import crossings, find_overlaps, resolve_overlaps, untangle
 
 TITLES = {"complex": "M. kansasii complex", "kansasii": "M. kansasii (sensu stricto)",
           "persicum": "M. persicum", "pseudokansasii": "M. pseudokansasii",
@@ -102,8 +102,18 @@ for name in [args.subset] if args.subset else SUBSETS:
     radii = np.array([radius(G.nodes[i]["n"]) for i in range(k)])
     before = sum(len(x) for x in find_overlaps(xy, edge_list, radii, 0.5 * r0))
     xy, left = resolve_overlaps(xy, edge_list, radii, 0.5 * r0)
+    ncross = len(crossings(xy, edge_list))
+    for _ in range(3):  # rotate/mirror subtrees until no two edges cross, then clean up node overlaps again
+        if not ncross:
+            break
+        xy = untangle(xy, edge_list, radii, 0.5 * r0)
+        xy, left = resolve_overlaps(xy, edge_list, radii, 0.5 * r0)
+        ncross = len(crossings(xy, edge_list))
     pos = {i: xy[i] for i in range(k)}
     print(f"{name}: node overlaps {before} -> {left}")
+    print(f"{name}: edge crossings {ncross}")
+    if ncross:
+        print(f"WARNING {name}: {ncross} edge crossings could not be resolved")
     if left:
         print(f"WARNING {name}: {left} node/edge overlaps could not be resolved")
 
@@ -183,10 +193,10 @@ for name in [args.subset] if args.subset else SUBSETS:
         for i in range(k):
             w, h = sizes[i]
             default = px[i] + np.array([0.0, rad_px[i] + 0.6 * r0 * sc + h / 2])
-            ang = np.linspace(0, 2 * np.pi, 24, endpoint=False)
+            ang = np.linspace(0, 2 * np.pi, 48, endpoint=False)
             unit = np.column_stack([np.cos(ang), np.sin(ang)])
             reach = np.abs(unit[:, 0]) * w / 2 + np.abs(unit[:, 1]) * h / 2
-            ring_c = [px[i] + unit * (rad_px[i] + gap + reach)[:, None] for gap in (3.0, 8.0, 16.0, 30.0, 50.0, 80.0, 120.0)]
+            ring_c = [px[i] + unit * (rad_px[i] + gap + reach)[:, None] for gap in (3.0, 8.0, 16.0, 30.0, 50.0, 80.0, 120.0, 200.0, 320.0)]
             cands.append(np.vstack([default, *ring_c]))
         ts = np.concatenate([[0.5], np.linspace(0.15, 0.85, 15)])
         for e, (u, v) in enumerate(edge_list):  # on the edge first, then beside it (either side, further out if crowded; joined by a leader line)

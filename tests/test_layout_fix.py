@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from layout_fix import find_overlaps, resolve_overlaps  # noqa: E402
+from layout_fix import crossings, find_overlaps, resolve_overlaps, untangle  # noqa: E402
 
 R = np.full(4, 0.1)
 
@@ -26,3 +26,13 @@ def test_clean_layout_unchanged_and_incident_edges_ignored() -> None:
     edges = [(0, 1), (1, 2), (2, 3)]
     new, left = resolve_overlaps(pos, edges, R, 0.05)
     assert left == 0 and (new == pos).all()
+
+
+def test_crossing_edges_are_untangled_by_rotating_a_subtree() -> None:
+    pos = np.array([[0.0, 0.0], [4.0, 0.0], [2.0, 2.0], [2.0, -2.0], [0.5, 3.0]])  # tree: 0-1, 1-2, 2-3 and 3-4 both cross 0-1
+    edges = [(0, 1), (1, 2), (2, 3), (3, 4)]
+    assert crossings(pos, edges) == [(0, 2), (0, 3)]
+    new = untangle(pos, edges, np.full(5, 0.1), 0.05)
+    assert crossings(new, edges) == []
+    for (u, v), (u2, v2) in zip(edges, edges):  # edge lengths unchanged
+        assert abs(np.hypot(*(new[u] - new[v])) - np.hypot(*(pos[u2] - pos[v2]))) < 1e-9

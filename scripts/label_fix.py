@@ -46,7 +46,7 @@ def rect_hits_segments(rects: Arr, segs: Arr) -> npt.NDArray[np.bool_]:
 
 
 def place_labels(size: Arr, cands: list[Arr], own_seg: list[int], segs: Arr, discs: Arr, fixed: Arr, bounds: Arr,
-                 margin: float = 2.0, max_pass: int = 60, walk: int = 600) -> tuple[Arr, int, int]:
+                 margin: float = 2.0, max_pass: int = 60, walk: int = 3000) -> tuple[Arr, int, int]:
     """Choose one candidate centre per label. `size` (n, 2) label width/height; `cands[i]` (c_i, 2) candidate centres, the
     first being the default and the starting point; `own_seg[i]` index of the edge label i belongs to (-1 none) which it may
     cover; `fixed` (r, 4) rectangles to keep clear (legend); `bounds` (4,) rectangle all labels must stay inside.

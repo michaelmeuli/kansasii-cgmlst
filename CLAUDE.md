@@ -12,5 +12,6 @@ chewBBACA cgMLST scheme + Ridom-style MSTs of the M. kansasii complex. Only what
 - `run_all.sbatch` uses `python`, not `python -I` (scripts import `common`). Run heavy steps via sbatch, not the login node.
 - Sample QC is copied from `kansasii-mst/scripts/common.py` but differs on purpose: control strains (`LABEL`) of complex species (NR 128/132/133) are kept and shown by their LABEL; other rules must stay in sync.
 - `layout_fix.py` guarantees no node on a non-incident edge (enlarges the layout if nudging gets stuck); `09` prints overlaps before -> after and warns if any remain.
+- `layout_fix.untangle` removes edge-edge crossings by rotating/mirroring subtrees (edge lengths kept); `09` prints `edge crossings N` and warns if any remain.
 - `label_fix.py` places node labels and edge-weight boxes (pixel space) so none touches another label, a node, a foreign edge or the legend; `09` prints `label overlaps N -> M` and enlarges the figure (up to 1.1^6) if any remain; labels moved off their node/edge get a dotted leader line.
 - Type check: `~/data/conda/envs/env_typecheck/bin/mypy`. Commit directly on `master`; push only when asked.
