@@ -17,6 +17,9 @@ def link(src: Path, dst: Path) -> None:
 
 GENOMES.mkdir(parents=True, exist_ok=True)
 SEEDS.mkdir(parents=True, exist_ok=True)
+for old in GENOMES.glob("*.fasta"):  # drop links of genomes that no longer pass QC (AlleleCall reads the whole directory)
+    if old.is_symlink():
+        old.unlink()
 rows: list[dict[str, object]] = []
 s = load_samples()
 for r in s[s.keep].itertuples():
