@@ -12,7 +12,7 @@ Run: `sbatch run_all.sbatch` (env `env_cgmlst`, see `environment.yml`); `STEPS="
 
 | Step | Script | What |
 |---|---|---|
-| 00 | `00_prepare_inputs.py` | 173 QC-passing cohort assemblies (QC as in `kansasii-mst`: no contaminated (CheckM > 5 %), non-complex; unlike `kansasii-mst` the ATCC/DSM control strains of complex species, NR 128/132/133, are kept and shown by their `LABEL`) + 7 public GTDB representatives (ATCC 12478 = *kansasii*, plus persicum, pseudokansasii, attenuatum, innocens, ostraviense, gastri) = 180 genomes |
+| 00 | `00_prepare_inputs.py` | 175 QC-passing cohort assemblies (QC as in `kansasii-mst`: no contaminated (CheckM > 5 %), non-complex; unlike `kansasii-mst` the ATCC/DSM control strains of complex species, NR 128/132/133, are kept and shown by their `LABEL`) + 7 public GTDB representatives (ATCC 12478 = *kansasii*, plus persicum, pseudokansasii, attenuatum, innocens, ostraviense, gastri) = 182 genomes |
 | 01 | `01_prodigal_training.sh` | `prodigal -p single` on ATCC 12478 (GCF_000157895.3) -> `ATCC12478.trn` |
 | 02 | `02_create_schema.sh` | `CreateSchema` on the 7 public representatives (seed genomes) with `--ptf ATCC12478.trn` -> 9,216 loci |
 | 03 | `03_allele_call.sh` | `AlleleCall` of all 182 genomes (`--ptf`, `--output-masked`); runs on a copy of the schema because new alleles are added |
