@@ -7,17 +7,18 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(os.environ.get("KANSASII_ROOT", "/shares/sander.imm.uzh/MM/kansasii"))
-OUT = ROOT / "output/cgmlst"
-GENOMES = OUT / "genomes"  # symlinks <sample>.fasta, input of AlleleCall
-SEEDS = OUT / "seed_genomes"  # symlinks, input of CreateSchema
-SCHEMA = OUT / "schema"
-ALLELE_CALL = OUT / "allele_call"
-CGMLST = OUT / "cgmlst"
-EVAL = OUT / "schema_evaluator"
+OUT = ROOT / "output/cgmlst"  # final tables and figures only
+WORK = ROOT / "runs/cgmlst"  # chewBBACA working state (schemas, genome links, full reports)
+GENOMES = WORK / "genomes"  # symlinks <sample>.fasta, input of AlleleCall
+SEEDS = WORK / "seed_genomes"  # symlinks, input of CreateSchema
+SCHEMA = WORK / "schema"
+ALLELE_CALL = WORK / "allele_call"
+CGMLST = WORK / "cgmlst"
+EVAL = WORK / "schema_evaluator"
 ASSEMBLIES = ROOT / "output/ridom/assemblies"  # <sample>.fasta, the cohort assemblies collected for SeqSphere
 GTDB_REPS = ROOT / "data/gtdb_genomes/Mycobacteriaceae/kansasii_complex_gtdb_representatives"
 ATCC_FASTA = ROOT / "data/gtdb_genomes/Mycobacteriaceae/ncbi_dataset/data/GCF_000157895.3/GCF_000157895.3_ASM15789v2_genomic.fna"
-PTF = OUT / "ATCC12478.trn"  # Prodigal training file
+PTF = WORK / "ATCC12478.trn"  # Prodigal training file
 
 COMPLEX = ["kansasii", "persicum", "pseudokansasii", "attenuatum", "innocens", "ostraviense"]
 # public GTDB representatives (file stem, species); the first is the ATCC 12478 type strain of M. kansasii

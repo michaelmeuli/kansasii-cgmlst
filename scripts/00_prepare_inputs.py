@@ -1,5 +1,5 @@
-"""Link the QC-passing cohort assemblies and the public reference genomes into output/cgmlst/genomes/, the species
-representatives into seed_genomes/ (CreateSchema input), and write samples.tsv (sample, NR, species, source, is_reference)."""
+"""Link the QC-passing cohort assemblies and the public reference genomes into runs/cgmlst/genomes/, the species
+representatives into runs/cgmlst/seed_genomes/ (CreateSchema input), and write samples.tsv (sample, NR, species, source, is_reference)."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -33,5 +33,6 @@ for acc, sp in REFERENCES.items():
     rows.append({"sample": acc, "NR": None, "species": sp, "label": "", "is_control": False,
                  "source": str(src), "is_reference": True})
 df = pd.DataFrame(rows)
+OUT.mkdir(parents=True, exist_ok=True)
 df.to_csv(OUT / "samples.tsv", sep="\t", index=False)
 print(f"{len(df)} genomes ({int(df.is_reference.sum())} references); species:\n{df.species.value_counts().to_string()}")

@@ -8,7 +8,7 @@ import re
 
 import pandas as pd
 
-from common import EVAL, OUT
+from common import CGMLST, EVAL, OUT
 
 html = (EVAL / "schema_report.html").read_text()
 m = re.search(r"preComputedData\s*=\s*(\{.*?\})\s*;?\s*</script>", html, flags=re.S)
@@ -30,7 +30,7 @@ for c in flag_cols:
     rows.append((f"loci with >=1 allele flagged: {c}", int((pd.to_numeric(loci[c], errors="coerce") > 0).sum())))
 for t in ("1.0", "0.99", "0.95"):
     p = round(float(t) * 100)
-    f = OUT / "cgmlst" / f"t{t}" / f"cgMLSTschema{p}.txt"
+    f = CGMLST / f"t{t}" / f"cgMLSTschema{p}.txt"
     if f.exists():
         rows.append((f"cgMLST loci at >= {p}% presence", sum(1 for _ in f.open())))
 out = pd.DataFrame(rows, columns=["metric", "value"])

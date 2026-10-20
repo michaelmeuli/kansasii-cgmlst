@@ -3,9 +3,10 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=48G
 #SBATCH --time=24:00:00
-#SBATCH --output=/shares/sander.imm.uzh/MM/kansasii/output/cgmlst/logs/%x-%j.log
+#SBATCH --output=/shares/sander.imm.uzh/MM/kansasii/runs/cgmlst/logs/%x-%j.log
 # Whole pipeline. STEPS="01 02 03" runs only those steps (default: all).
 set -euo pipefail
+mkdir -p /shares/sander.imm.uzh/MM/kansasii/runs/cgmlst/logs
 source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate env_cgmlst
 cd /shares/sander.imm.uzh/MM/kansasii/repos/kansasii-cgmlst/scripts

@@ -3,7 +3,9 @@
 cgMLST scheme for the *Mycobacterium kansasii* complex built with chewBBACA (3.5.4), and Ridom SeqSphere-style
 minimum spanning trees (MSTs) of the allele profiles. Complements `kansasii-mst` (core-SNP MSTs).
 
-Outputs go to `$KANSASII_ROOT/output/cgmlst/` (default `/shares/sander.imm.uzh/MM/kansasii`), figures in `output/cgmlst/mst/`.
+Final tables and figures go to `$KANSASII_ROOT/output/cgmlst/` (default `/shares/sander.imm.uzh/MM/kansasii`), figures in `output/cgmlst/mst/`.
+The chewBBACA working state (genome links, schemas, `schema_called`, per-locus reports, `cds_coordinates.tsv`, logs; ~350 MB) lives in `runs/cgmlst/`;
+the scripts copy the result tables from there to `output/cgmlst/` (`publish` in `scripts/env.sh`).
 Run: `sbatch run_all.sbatch` (env `env_cgmlst`, see `environment.yml`); `STEPS="07 08 09" sbatch --export=ALL,STEPS="07 08 09" run_all.sbatch` runs a subset.
 
 ## Method

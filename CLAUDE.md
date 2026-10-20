@@ -3,6 +3,7 @@
 chewBBACA cgMLST scheme + Ridom-style MSTs of the M. kansasii complex. Only what is easy to get wrong:
 
 - chewBBACA 3.5.4 uses Pyrodigal for prediction; the `.trn` training file comes from the Prodigal binary (in `env_cgmlst`).
+- Two trees: `runs/cgmlst/` (`WORK`: everything chewBBACA writes, steps read from here) and `output/cgmlst/` (`OUT`: result tables/figures only, filled by `publish`). Do not point a step's chewBBACA output at `OUT`.
 - Output names differ from older docs: `cgMLST<pct>.tsv` / `cgMLSTschema<pct>.txt` (95, 99, 100), flat `allele_call/` dir, `SchemaEvaluator -g`.
 - AlleleCall adds alleles to the schema, so step 03 runs on a copy (`schema_called`); step 06 reads loci from that copy.
 - Genome ids with dots (GCF_000157895.3): never `Path.stem`; strip `.fasta` only.
