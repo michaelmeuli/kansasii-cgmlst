@@ -6,5 +6,5 @@ python_version = "3.11"
 files = ["scripts", "tests"]
 
 [[tool.mypy.overrides]]
-module = ["networkx.*", "adjustText", "pytest"]
+module = ["networkx.*", "pytest"]
 ignore_missing_imports = true
