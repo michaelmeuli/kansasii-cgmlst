@@ -24,6 +24,15 @@ Run: `sbatch run_all.sbatch` (env `env_cgmlst`, see `environment.yml`); `STEPS="
 | 09 | `09_mst_figures.py` | MST figures |
 | 10 | `10_export_ridom.py` | `output/ridom_assemblies.tar.gz` for Ridom SeqSphere+: the same QC-passing cohort + 7 references as real FASTA files (`ridom/assemblies/`); isolates named `M001` (as in the MST labels), control strains by `LABEL` (`M_kansasii_ATCC_12478`, ...), references by accession; `ridom/metadata.tsv` (name, sample, species as `M. kansasii` ..., ST, CheckM, flags) for the isolate-data import. Written to `.part` and renamed when complete (~20 min, run via sbatch) |
 
+## Sample exclusion (`excluded`)
+
+Genomes that are allele-called (the *pool*: complex species, `contamination_flag` empty) define the scheme. Step 07 writes
+`output/cgmlst/sample_qc.tsv` (`cgmlst_called_pct`: % of the cgMLST95 loci with an allele call); immensekansasii
+`06_screening_map_results.py` copies it into `data/imm/screening_map_results.csv` and sets `excluded` = contaminated or
+`cgmlst_called_pct` < 90 (Ridom's good-target threshold). Steps 08-10 (distances, MSTs, Ridom export) skip `excluded`
+genomes (`load_samples().keep`); the scheme itself still counts them in the 95 % presence rule (negligible: >= 173 of 182
+genomes). Order: `STEPS="07"` -> 06 -> `STEPS="08 09 10"`. M055 (81.5 %) is the only isolate excluded by coverage.
+
 ## Scheme
 
 | metric | value |

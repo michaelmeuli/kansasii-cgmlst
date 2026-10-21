@@ -8,6 +8,7 @@ import re
 
 import pandas as pd
 
+from allele_distance import encode
 from common import CGMLST, EVAL, OUT
 
 html = (EVAL / "schema_report.html").read_text()
@@ -36,3 +37,13 @@ for t in ("1.0", "0.99", "0.95"):
 out = pd.DataFrame(rows, columns=["metric", "value"])
 out.to_csv(OUT / "scheme_summary.tsv", sep="\t", index=False)
 print(out.to_string(index=False))
+
+# per-genome estimate for screening_map_results.csv (immensekansasii 06): % of the cgMLST loci with an allele call
+tsv = CGMLST / "t0.95" / "cgMLST95.tsv"
+if tsv.exists():
+    table = pd.read_csv(tsv, sep="\t", index_col=0, dtype=str)
+    called = (encode(table) > 0).mean(axis=1) * 100
+    qc = pd.DataFrame({"sample": [str(i).removesuffix(".fasta") for i in table.index],
+                       "cgmlst_called_pct": called.round(2)}).sort_values("cgmlst_called_pct")
+    qc.to_csv(OUT / "sample_qc.tsv", sep="\t", index=False)
+    print(f"\nsample_qc.tsv: {len(qc)} genomes x {table.shape[1]} loci; lowest:\n{qc.head(5).to_string(index=False)}")

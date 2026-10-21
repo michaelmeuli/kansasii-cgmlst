@@ -22,7 +22,7 @@ for old in GENOMES.glob("*.fasta"):  # drop links of genomes that no longer pass
         old.unlink()
 rows: list[dict[str, object]] = []
 s = load_samples()
-for r in s[s.keep].itertuples():
+for r in s[s.in_pool].itertuples():  # pool incl. `excluded` genomes: they are called and measured (see 07), but not drawn
     src = ASSEMBLIES / f"{r.sample}.fasta"
     assert src.exists(), src
     link(src, GENOMES / f"{r.sample}.fasta")

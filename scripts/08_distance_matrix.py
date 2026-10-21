@@ -6,7 +6,7 @@ import argparse
 import pandas as pd
 
 from allele_distance import encode, pairwise_deletion
-from common import CGMLST, OUT, REFERENCES, SUBSETS
+from common import CGMLST, OUT, REFERENCES, SUBSETS, load_samples
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--threshold", default="0.95", help="cgMLST threshold directory to use (t<threshold>)")
@@ -16,6 +16,9 @@ tsv = CGMLST / f"t{args.threshold}" / f"cgMLST{round(float(args.threshold) * 100
 table = pd.read_csv(tsv, sep="\t", index_col=0, dtype=str)
 table.index = pd.Index([str(i).removesuffix(".fasta") for i in table.index], name="sample")  # file names -> sample ids
 samples = pd.read_csv(OUT / "samples.tsv", sep="\t").set_index("sample")
+excluded = set(load_samples().query("excluded")["sample"])  # screening_map_results.csv: contaminated or < 90 % loci called
+samples = samples[~samples.index.isin(excluded)]
+print(f"excluded from distances (`excluded` column): {sorted(excluded & set(table.index))}")
 missing = set(samples.index) - set(table.index)
 if missing:  # genomes dropped by ExtractCgMLST (too many missing loci) -- report, do not hide
     print(f"WARNING {len(missing)} genomes not in the cgMLST table: {sorted(missing)}")

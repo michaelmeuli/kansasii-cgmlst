@@ -62,12 +62,23 @@ def strip_plasmids(src: Path, dst: Path) -> list[str]:
 
 
 def load_samples() -> pd.DataFrame:
-    """Cohort genomes with columns sample, NR, species, label (LABEL of the ATCC/DSM control strains, else ''), keep (bool) and
-    reason (why excluded, else ''). Control strains of complex species are kept (unlike kansasii-mst); non-complex ones are not."""
-    m = pd.read_csv(ROOT / "data/imm/screening_map_results.csv",
-                    usecols=["NR", "PROBENNUMMER", "LABEL", "species", "contamination_flag"])
-    reason = pd.Series("", index=m.index)
-    reason[~m.species.isin(COMPLEX)] = "not in complex"
-    reason[(m.contamination_flag == "contaminated") & (reason == "")] = "contaminated"
-    return pd.DataFrame({"sample": m.PROBENNUMMER, "NR": m.NR, "species": m.species,
-                         "label": m.LABEL.fillna(""), "keep": reason == "", "reason": reason}).sort_values("NR").reset_index(drop=True)
+    """Cohort genomes with columns sample, NR, species, label (LABEL of the ATCC/DSM control strains, else ''), in_pool (complex
+    species, not contaminated: the genomes that are allele-called and define the scheme), excluded (bool: `excluded` column of
+    screening_map_results.csv = contaminated or < 90 % of the cgMLST loci called), keep (in_pool and not excluded: the genomes
+    of the distance matrices, MSTs and Ridom export) and reason (why not kept, else ''). Control strains of complex species are
+    kept (unlike kansasii-mst); non-complex ones are not. Without the `excluded` column (first run) nothing is excluded by it."""
+    path = ROOT / "data/imm/screening_map_results.csv"
+    cols = ["NR", "PROBENNUMMER", "LABEL", "species", "contamination_flag"]
+    extra = [c for c in ("excluded", "cgmlst_called_pct") if c in pd.read_csv(path, nrows=0).columns]
+    m = pd.read_csv(path, usecols=cols + extra, dtype={"excluded": str, "cgmlst_called_pct": str})
+    pool_reason = pd.Series("", index=m.index)
+    pool_reason[~m.species.isin(COMPLEX)] = "not in complex"
+    pool_reason[(m.contamination_flag == "contaminated") & (pool_reason == "")] = "contaminated"
+    excluded = m["excluded"].fillna("").str.lower().eq("true") if "excluded" in m else pd.Series(False, index=m.index)
+    pct = m["cgmlst_called_pct"].fillna("") if "cgmlst_called_pct" in m else pd.Series("", index=m.index)
+    reason = pool_reason.copy()
+    low = excluded & (reason == "")
+    reason[low] = "low cgMLST coverage (" + pct[low] + " % of loci called)"
+    return pd.DataFrame({"sample": m.PROBENNUMMER, "NR": m.NR, "species": m.species, "label": m.LABEL.fillna(""),
+                         "in_pool": pool_reason == "", "excluded": excluded, "keep": reason == "",
+                         "reason": reason}).sort_values("NR").reset_index(drop=True)

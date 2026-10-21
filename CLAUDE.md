@@ -10,6 +10,7 @@ chewBBACA cgMLST scheme + Ridom-style MSTs of the M. kansasii complex. Only what
 - Distances use pairwise deletion (`allele_distance.py`); 0 in the cgMLST table = missing, allele ids start at 1.
 - Good-target % is parsed from the JSON embedded in `schema_report.html` (07), not a separate table.
 - `run_all.sbatch` uses `python`, not `python -I` (scripts import `common`). Run heavy steps via sbatch, not the login node.
+- `excluded` (screening_map_results.csv, written by immensekansasii 06 from `output/cgmlst/sample_qc.tsv`) drops genomes in 08/09/10 only; step 00 still allele-calls the whole pool (`in_pool`), otherwise an excluded genome would lose its estimate and flip back. Run order after a new allele call: 07 -> immensekansasii 06 -> 08-10.
 - Sample QC is copied from `kansasii-mst/scripts/common.py` but differs on purpose: control strains (`LABEL`) of complex species (NR 128/132/133) are kept and shown by their LABEL; other rules must stay in sync.
 - `layout_fix.py` guarantees no node on a non-incident edge (enlarges the layout if nudging gets stuck); `09` prints overlaps before -> after and warns if any remain.
 - `layout_fix.untangle` removes edge-edge crossings by rotating/mirroring subtrees (edge lengths kept); `09` prints `edge crossings N` and warns if any remain.
