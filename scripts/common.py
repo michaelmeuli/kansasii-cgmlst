@@ -17,6 +17,7 @@ CGMLST = WORK / "cgmlst"
 EVAL = WORK / "schema_evaluator"
 ASSEMBLIES = ROOT / "output/ridom/assemblies"  # <sample>.fasta, the cohort assemblies collected for SeqSphere
 GTDB_REPS = ROOT / "data/gtdb_genomes/Mycobacteriaceae/kansasii_complex_gtdb_representatives"
+REF_FASTA = WORK / "reference_genomes"  # <accession>.fasta: the GTDB representatives without plasmid contigs (step 00)
 ATCC_FASTA = ROOT / "data/gtdb_genomes/Mycobacteriaceae/ncbi_dataset/data/GCF_000157895.3/GCF_000157895.3_ASM15789v2_genomic.fna"
 PTF = WORK / "ATCC12478.trn"  # Prodigal training file
 
@@ -42,6 +43,22 @@ SPECIES_COLORS = {
 }
 # chewBBACA allele-call classifications that are not an allele id; with pairwise deletion they count as missing
 MISSING_CODES = ("LNF", "NIPH", "NIPHEM", "ASM", "ALM", "PLOT3", "PLOT5", "LOTSC")
+
+
+def strip_plasmids(src: Path, dst: Path) -> list[str]:
+    """Write src to dst without the contigs whose header says "plasmid"; return the headers of the removed contigs."""
+    kept: list[str] = []
+    removed: list[str] = []
+    for rec in src.read_text().split("\n>"):
+        rec = rec.lstrip(">")
+        if not rec.strip():
+            continue
+        header = rec.split("\n", 1)[0]
+        (removed if "plasmid" in header.lower() else kept).append(rec.rstrip("\n"))
+    assert kept, f"{src}: only plasmid contigs"
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_text("".join(f">{r}\n" for r in kept))
+    return [r.split("\n", 1)[0] for r in removed]
 
 
 def load_samples() -> pd.DataFrame:

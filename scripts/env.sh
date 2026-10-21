@@ -7,6 +7,5 @@ mkdir -p "$OUT" "$WORK"
 # publish DIR FILE...: copy the result tables FILE (relative to $WORK/DIR) into $OUT/DIR
 publish() { local d="$1"; shift; mkdir -p "$OUT/$d"; for f in "$@"; do cp "$WORK/$d/$f" "$OUT/$d/$f"; done; }
 CPU="${SLURM_CPUS_PER_TASK:-8}"
-ATCC="$KANSASII_ROOT/data/gtdb_genomes/Mycobacteriaceae/ncbi_dataset/data/GCF_000157895.3/GCF_000157895.3_ASM15789v2_genomic.fna"
 CGMLST_THRESHOLD="${CGMLST_THRESHOLD:-0.95}"   # ExtractCgMLST: loci present in >= this fraction of genomes
 PCT=$(awk "BEGIN{printf \"%d\", $CGMLST_THRESHOLD*100}")   # file-name suffix used by ExtractCgMLST (0.95 -> 95)

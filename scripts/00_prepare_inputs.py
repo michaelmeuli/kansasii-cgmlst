@@ -1,12 +1,12 @@
 """Link the QC-passing cohort assemblies and the public reference genomes into runs/cgmlst/genomes/, the species
-representatives into runs/cgmlst/seed_genomes/ (CreateSchema input), and write samples.tsv (sample, NR, species, source, is_reference)."""
+representatives (plasmid contigs removed, runs/cgmlst/reference_genomes/) into runs/cgmlst/seed_genomes/ (CreateSchema input), and write samples.tsv (sample, NR, species, source, is_reference)."""
 from __future__ import annotations
 
 from pathlib import Path
 
 import pandas as pd
 
-from common import ASSEMBLIES, GENOMES, GTDB_REPS, OUT, REFERENCES, SEEDS, load_samples
+from common import ASSEMBLIES, GENOMES, GTDB_REPS, OUT, REF_FASTA, REFERENCES, SEEDS, load_samples, strip_plasmids
 
 
 def link(src: Path, dst: Path) -> None:
@@ -29,8 +29,11 @@ for r in s[s.keep].itertuples():
     rows.append({"sample": r.sample, "NR": r.NR, "species": r.species, "label": r.label,
                  "is_control": bool(r.label), "source": str(src), "is_reference": False})
 for acc, sp in REFERENCES.items():
-    src = GTDB_REPS / f"{acc}_query.fasta"
-    assert src.exists(), src
+    raw = GTDB_REPS / f"{acc}_query.fasta"
+    assert raw.exists(), raw
+    src = REF_FASTA / f"{acc}.fasta"
+    for h in strip_plasmids(raw, src):  # plasmid genes are not core genome: keep them out of seeds, training and allele calls
+        print(f"{acc}: plasmid contig removed: {h}")
     link(src, GENOMES / f"{acc}.fasta")
     link(src, SEEDS / f"{acc}.fasta")
     rows.append({"sample": acc, "NR": None, "species": sp, "label": "", "is_control": False,

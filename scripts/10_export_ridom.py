@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from common import ASSEMBLIES, GTDB_REPS, REFERENCES, ROOT, load_samples
+from common import ASSEMBLIES, REF_FASTA, REFERENCES, ROOT, load_samples
 
 TARBALL = ROOT / "output/ridom_assemblies.tar.gz"
 MANIFEST = ROOT / "output/ridom/manifest.tsv"
@@ -42,7 +42,7 @@ for sample, species, label in zip(s["sample"].astype(str), s["species"].astype(s
                  "is_reference": False, "src": ASSEMBLIES / f"{sample}.fasta"})
 for acc, sp in REFERENCES.items():
     rows.append({"name": acc, "sample": acc, "species": species_label(sp), "mlst_ST": "", "checkm_contamination": "",
-                 "is_control": False, "is_reference": True, "src": GTDB_REPS / f"{acc}_query.fasta"})
+                 "is_control": False, "is_reference": True, "src": REF_FASTA / f"{acc}.fasta"})
 df = pd.DataFrame(rows)
 assert df.name.is_unique, df.name[df.name.duplicated()].tolist()
 
