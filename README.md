@@ -77,6 +77,7 @@ GCF_002086675.1: 117 (that public persicum genome is strain AFPC-000227, not DSM
 
 ## Caveats
 
+- Only pMK12478 (labelled plasmid in the FASTA) is removed from the references. The 117 kb contig `NZ_UPHU01000002.1` of the pseudokansasii reference MK142 (conjugation genes, ESX cluster, no rRNA/tRNA; in 8 of 20 pseudokansasii and partly in 6 other isolates) is not labelled by NCBI and is kept on purpose.
 - Nearly every isolate has a unique profile, so nodes are single genomes and MST edge labels are large
   (tens to hundreds of alleles); this reflects strong recombination in the complex, and allele distances are not recombination-filtered.
 - ATCC 12478 carries unusual alleles; it is only the Prodigal training source and a seed genome.
