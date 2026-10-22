@@ -14,9 +14,9 @@ Run: `sbatch run_all.sbatch` (env `env_cgmlst`, see `environment.yml`); `STEPS="
 |---|---|---|
 | 00 | `00_prepare_inputs.py` | 175 QC-passing cohort assemblies (QC as in `kansasii-mst`: no contaminated (CheckM > 5 %), non-complex; unlike `kansasii-mst` the ATCC/DSM control strains of complex species, NR 128/132/133, are kept and shown by their `LABEL`) + 7 public GTDB representatives, plasmid contigs removed (only ATCC 12478 pMK12478, NC_022654.1, is labelled as a plasmid; `strip_plasmids` in `common.py` matches "plasmid" in the FASTA header) (ATCC 12478 = *kansasii*, plus persicum, pseudokansasii, attenuatum, innocens, ostraviense, gastri) = 182 genomes |
 | 01 | `01_prodigal_training.sh` | `prodigal -p single` on ATCC 12478 (GCF_000157895.3) -> `ATCC12478.trn` |
-| 02 | `02_create_schema.sh` | `CreateSchema` on the 7 public representatives (seed genomes) with `--ptf ATCC12478.trn` -> 9,216 loci |
+| 02 | `02_create_schema.sh` | `CreateSchema` on the 7 public representatives (seed genomes) with `--ptf ATCC12478.trn` -> 9,072 loci |
 | 03 | `03_allele_call.sh` | `AlleleCall` of all 182 genomes (`--ptf`, `--output-masked`); runs on a copy of the schema because new alleles are added |
-| 04 | `04_remove_paralogs.sh` | `RemoveGenes` for the 59 loci in `paralogous_counts.tsv` |
+| 04 | `04_remove_paralogs.sh` | `RemoveGenes` for the 69 loci in `paralogous_counts.tsv` |
 | 05 | `05_extract_cgmlst.sh` | `ExtractCgMLST --t 1.0 / 0.99 / 0.95`; 0.95 is the scheme used downstream (`CGMLST_THRESHOLD` in `env.sh`) |
 | 06 | `06_schema_evaluator.sh` | `SchemaEvaluator --ta 11` on the final cgMLST loci |
 | 07 | `07_summarise_scheme.py` | good-target percentage -> `scheme_summary.tsv`, `schema_evaluator_loci.tsv` |
@@ -37,10 +37,10 @@ genomes). Order: `STEPS="07"` -> 06 -> `STEPS="08 09 10"`. M055 (81.5 %) is the 
 
 | metric | value |
 |---|---|
-| loci in schema (seed) | 9,216 |
-| paralogous loci removed | 59 (9,157 remain) |
-| cgMLST loci, present in 100 % / 99 % / 95 % of genomes | 1,501 / 2,576 / **3,655** |
-| **good targets** (SchemaEvaluator: no flagged allele) | **3,602 / 3,655 = 98.5 %** (all alleles valid; 6 loci with an allele < 201 bp, 48 with an allele above the size threshold) |
+| loci in schema (seed) | 9,072 |
+| paralogous loci removed | 69 (9,003 remain) |
+| cgMLST loci, present in 100 % / 99 % / 95 % of genomes | 1,494 / 2,569 / **3,647** |
+| **good targets** (SchemaEvaluator: no flagged allele) | **3,596 / 3,647 = 98.6 %** (all alleles valid; 6 loci with an allele < 201 bp, 46 with an allele above the size threshold) |
 
 98.6 % is above the 95-98 % usually quoted for published schemes. Schema and cgMLST were defined on the same 182 genomes, so the
 95 % presence rule is satisfied by construction; validate on new isolates before treating the scheme as fixed.
@@ -50,7 +50,7 @@ genomes). Order: `STEPS="07"` -> 06 -> `STEPS="08 09 10"`. M055 (81.5 %) is the 
 As in Ridom, a locus counts for a pair of genomes only if both have an allele call. Everything that is not an allele id
 (LNF, NIPH, NIPHEM, ASM, ALM, PLOT3, PLOT5, LOTSC, 0 in the masked table) is missing. Distance = number of called-in-both loci with
 different alleles (no normalisation). `shared_loci_<subset>.csv` gives the number of loci compared per pair
-(minimum 2,688 of 3,655 in the complex). `tests/test_allele_distance.py` checks this against hand-computed values.
+(minimum 3,136 of 3,647 in the complex). `tests/test_allele_distance.py` checks this against hand-computed values.
 
 ## Figures (`output/cgmlst/mst/`)
 
