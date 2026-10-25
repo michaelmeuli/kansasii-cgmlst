@@ -33,7 +33,7 @@ for t in ("1.0", "0.99", "0.95"):
     p = round(float(t) * 100)
     f = CGMLST / f"t{t}" / f"cgMLSTschema{p}.txt"
     if f.exists():
-        rows.append((f"cgMLST loci at >= {p}% presence", sum(1 for _ in f.open())))
+        rows.append((f"cgMLST loci at >= {p}% presence", sum(1 for _ in f.open(encoding="utf-8"))))
 out = pd.DataFrame(rows, columns=["metric", "value"])
 out.to_csv(OUTPUT / "scheme_summary.tsv", sep="\t", index=False)
 print(out.to_string(index=False))
