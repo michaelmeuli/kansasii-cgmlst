@@ -21,3 +21,6 @@ done
 bash /shares/sander.imm.uzh/MM/kansasii/repos/kansasii-docs/bin/write_manifest.sh \
   "/shares/sander.imm.uzh/MM/kansasii/output/cgmlst" \
   /shares/sander.imm.uzh/MM/kansasii/repos/kansasii-cgmlst run_all.sbatch /shares/sander.imm.uzh/MM/kansasii/data/imm/screening_map_results.csv "STEPS=${STEPS:-all}"
+bash /shares/sander.imm.uzh/MM/kansasii/repos/kansasii-docs/bin/write_manifest.sh \
+  "/shares/sander.imm.uzh/MM/kansasii/output/ridom" \
+  /shares/sander.imm.uzh/MM/kansasii/repos/kansasii-cgmlst run_all.sbatch "STEPS=${STEPS:-all}"
