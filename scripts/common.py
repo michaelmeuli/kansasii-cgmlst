@@ -1,27 +1,24 @@
 """Shared paths, QC exclusion and subset definitions (sample QC mirrors kansasii-mst/scripts/common.py)."""
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(os.environ.get("KANSASII_ROOT", "/shares/sander.imm.uzh/MM/kansasii"))
-OUT = ROOT / "output/cgmlst"  # final tables and figures only
-WORK = ROOT / "runs/cgmlst"  # chewBBACA working state (schemas, genome links, full reports)
+from kansasii_paths import ASSEMBLIES, COMPLEX, OUTPUT_ROOT, RUNS, SCREENING_MAP_RESULTS
+
+OUTPUT = OUTPUT_ROOT / "cgmlst"  # final tables and figures only
+WORK = RUNS / "cgmlst"  # chewBBACA working state (schemas, genome links, full reports)
 GENOMES = WORK / "genomes"  # symlinks <sample>.fasta, input of AlleleCall
 SEEDS = WORK / "seed_genomes"  # symlinks, input of CreateSchema
 SCHEMA = WORK / "schema"
 ALLELE_CALL = WORK / "allele_call"
 CGMLST = WORK / "cgmlst"
 EVAL = WORK / "schema_evaluator"
-ASSEMBLIES = ROOT / "output/ridom/assemblies"  # <sample>.fasta, the cohort assemblies collected for SeqSphere
-GTDB_REPS = ROOT / "data/gtdb_genomes/Mycobacteriaceae/kansasii_complex_gtdb_representatives"
 REF_FASTA = WORK / "reference_genomes"  # <accession>.fasta: the GTDB representatives without plasmid contigs (step 00)
-ATCC_FASTA = ROOT / "data/gtdb_genomes/Mycobacteriaceae/ncbi_dataset/data/GCF_000157895.3/GCF_000157895.3_ASM15789v2_genomic.fna"
+RIDOM_TARBALL = OUTPUT_ROOT / "ridom_assemblies.tar.gz"
 PTF = WORK / "ATCC12478.trn"  # Prodigal training file
 
-COMPLEX = ["kansasii", "persicum", "pseudokansasii", "attenuatum", "innocens", "ostraviense"]
 # public GTDB representatives (file stem, species); the first is the ATCC 12478 type strain of M. kansasii
 REFERENCES = {
     "GCF_000157895.3": "kansasii", "GCF_002086675.1": "persicum", "GCF_900566075.1": "pseudokansasii",
@@ -36,13 +33,13 @@ SUBSETS: dict[str, list[str] | None] = {
     "pseudokansasii": ["pseudokansasii"],
     "persicum_attenuatum_ostraviense_innocens_gastri": ["persicum", "attenuatum", "ostraviense", "innocens", "gastri"],
 }
-# same colours as kansasii-mst / mlsa-kansasii
-SPECIES_COLORS = {
-    "kansasii": "#1b9e77", "persicum": "#d95f02", "pseudokansasii": "#7570b3", "innocens": "#e7298a",
-    "attenuatum": "#66a61e", "ostraviense": "#e6ab02", "gastri": "#a6761d",
-}
 # chewBBACA allele-call classifications that are not an allele id; with pairwise deletion they count as missing
 MISSING_CODES = ("LNF", "NIPH", "NIPHEM", "ASM", "ALM", "PLOT3", "PLOT5", "LOTSC")
+
+
+def assembly_fasta(sample: str, assemblies: Path = ASSEMBLIES) -> Path:
+    """Unicycler assembly of a cohort sample in the pipeline results."""
+    return assemblies / sample / "1_unicycler" / f"{sample}.fasta"
 
 
 def strip_plasmids(src: Path, dst: Path) -> list[str]:
@@ -61,13 +58,13 @@ def strip_plasmids(src: Path, dst: Path) -> list[str]:
     return [r.split("\n", 1)[0] for r in removed]
 
 
-def load_samples() -> pd.DataFrame:
+def load_samples(results: Path = SCREENING_MAP_RESULTS) -> pd.DataFrame:
     """Cohort genomes with columns sample, NR, species, label (LABEL of the ATCC/DSM control strains, else ''), in_pool (complex
     species, not contaminated: the genomes that are allele-called and define the scheme), excluded (bool: `excluded` column of
     screening_map_results.csv = contaminated or < 90 % of the cgMLST loci called), keep (in_pool and not excluded: the genomes
     of the distance matrices, MSTs and Ridom export) and reason (why not kept, else ''). Control strains of complex species are
     kept (unlike kansasii-mst); non-complex ones are not. Without the `excluded` column (first run) nothing is excluded by it."""
-    path = ROOT / "data/imm/screening_map_results.csv"
+    path = results
     cols = ["NR", "PROBENNUMMER", "LABEL", "species", "contamination_flag"]
     extra = [c for c in ("excluded", "cgmlst_called_pct") if c in pd.read_csv(path, nrows=0).columns]
     m = pd.read_csv(path, usecols=cols + extra, dtype={"excluded": str, "cgmlst_called_pct": str})

@@ -19,7 +19,8 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Circle, Wedge
 from matplotlib.text import Text
 
-from common import OUT, SPECIES_COLORS, SUBSETS
+from common import OUTPUT, SUBSETS
+from kansasii_paths import SPECIES_COLORS
 from label_fix import place_labels
 from layout_fix import crossings, find_overlaps, resolve_overlaps, untangle
 
@@ -32,7 +33,7 @@ ap.add_argument("--cluster-threshold", type=int, default=None,
                 help="shade nodes joined by edges of <= N allele differences (Ridom cluster alert distance)")
 ap.add_argument("--linear", action="store_true", help="linear instead of logarithmic edge lengths")
 args = ap.parse_args()
-MST = OUT / "mst"
+MST = OUTPUT / "mst"
 
 
 def kruskal(d: np.ndarray, size: np.ndarray) -> list[tuple[int, int, float]]:
@@ -59,7 +60,7 @@ def kruskal(d: np.ndarray, size: np.ndarray) -> list[tuple[int, int, float]]:
 for name in [args.subset] if args.subset else SUBSETS:
     D = pd.read_csv(MST / f"allele_distance_{name}.csv", index_col=0)
     shared = pd.read_csv(MST / f"shared_loci_{name}.csv", index_col=0)
-    samples = pd.read_csv(OUT / "samples.tsv", sep="\t").set_index("sample")
+    samples = pd.read_csv(OUTPUT / "samples.tsv", sep="\t").set_index("sample")
     # nodes = groups of genomes at distance 0 from the group's first member
     groups: list[list[str]] = []
     for s in D.index:

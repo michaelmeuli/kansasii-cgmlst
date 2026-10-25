@@ -4,9 +4,18 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import argparse
+
 import pandas as pd
 
-from common import ASSEMBLIES, GENOMES, GTDB_REPS, OUT, REF_FASTA, REFERENCES, SEEDS, load_samples, strip_plasmids
+from common import GENOMES, OUTPUT, REF_FASTA, REFERENCES, SEEDS, assembly_fasta, load_samples, strip_plasmids
+from kansasii_paths import ASSEMBLIES, GTDB_REPRESENTATIVES, SCREENING_MAP_RESULTS
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--gtdb-representatives", type=Path, default=GTDB_REPRESENTATIVES, help="public reference genomes, <accession>_query.fasta")
+ap.add_argument("--assemblies", type=Path, default=ASSEMBLIES, help="<sample>/1_unicycler/<sample>.fasta of the cohort")
+ap.add_argument("--screening-map-results", type=Path, default=SCREENING_MAP_RESULTS)
+args = ap.parse_args()
 
 
 def link(src: Path, dst: Path) -> None:
@@ -21,15 +30,15 @@ for old in GENOMES.glob("*.fasta"):  # drop links of genomes that no longer pass
     if old.is_symlink():
         old.unlink()
 rows: list[dict[str, object]] = []
-s = load_samples()
+s = load_samples(args.screening_map_results)
 for r in s[s.in_pool].itertuples():  # pool incl. `excluded` genomes: they are called and measured (see 07), but not drawn
-    src = ASSEMBLIES / f"{r.sample}.fasta"
+    src = assembly_fasta(str(r.sample), args.assemblies)
     assert src.exists(), src
     link(src, GENOMES / f"{r.sample}.fasta")
     rows.append({"sample": r.sample, "NR": r.NR, "species": r.species, "label": r.label,
                  "is_control": bool(r.label), "source": str(src), "is_reference": False})
 for acc, sp in REFERENCES.items():
-    raw = GTDB_REPS / f"{acc}_query.fasta"
+    raw = args.gtdb_representatives / f"{acc}_query.fasta"
     assert raw.exists(), raw
     src = REF_FASTA / f"{acc}.fasta"
     for h in strip_plasmids(raw, src):  # plasmid genes are not core genome: keep them out of seeds, training and allele calls
@@ -39,6 +48,6 @@ for acc, sp in REFERENCES.items():
     rows.append({"sample": acc, "NR": None, "species": sp, "label": "", "is_control": False,
                  "source": str(src), "is_reference": True})
 df = pd.DataFrame(rows)
-OUT.mkdir(parents=True, exist_ok=True)
-df.to_csv(OUT / "samples.tsv", sep="\t", index=False)
+OUTPUT.mkdir(parents=True, exist_ok=True)
+df.to_csv(OUTPUT / "samples.tsv", sep="\t", index=False)
 print(f"{len(df)} genomes ({int(df.is_reference.sum())} references); species:\n{df.species.value_counts().to_string()}")

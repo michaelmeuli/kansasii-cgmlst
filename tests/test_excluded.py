@@ -2,14 +2,14 @@
 Compared with the previous rule (contamination only), M055 must be the only additionally excluded complex isolate."""
 from __future__ import annotations
 
-import os
+import sys
 from pathlib import Path
 
 import pandas as pd
 import pytest
 
-CSV = Path(os.environ.get("KANSASII_ROOT", "/shares/sander.imm.uzh/MM/kansasii")) / "data/imm/screening_map_results.csv"
-COMPLEX = ["kansasii", "persicum", "pseudokansasii", "attenuatum", "innocens", "ostraviense"]
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+from kansasii_paths import COMPLEX, SCREENING_MAP_RESULTS as CSV  # noqa: E402
 
 pytestmark = pytest.mark.skipif(not CSV.exists(), reason="screening_map_results.csv not available")
 

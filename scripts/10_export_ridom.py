@@ -3,6 +3,7 @@ ATCC/DSM control strains by their LABEL) + the 7 public reference genomes (named
 isolate-data import. Names match the node labels of the cgMLST MSTs (09_mst_figures.py)."""
 from __future__ import annotations
 
+import argparse
 import re
 import shutil
 import tarfile
@@ -11,10 +12,21 @@ from pathlib import Path
 
 import pandas as pd
 
-from common import ASSEMBLIES, REF_FASTA, REFERENCES, ROOT, load_samples
+from common import REF_FASTA, REFERENCES, RIDOM_TARBALL, assembly_fasta, load_samples
+from kansasii_paths import ASSEMBLIES, SCREENING_MAP_RESULTS
 
-TARBALL = ROOT / "output/ridom_assemblies.tar.gz"
-MANIFEST = ROOT / "output/ridom/manifest.tsv"
+ap = argparse.ArgumentParser()
+ap.add_argument("--assemblies", type=Path, default=ASSEMBLIES, help="<sample>/1_unicycler/ and 5_typing/mlst/ per sample")
+ap.add_argument("--screening-map-results", type=Path, default=SCREENING_MAP_RESULTS, help="keep set and CheckM contamination")
+ap.add_argument("--tarball", type=Path, default=RIDOM_TARBALL)
+args = ap.parse_args()
+TARBALL: Path = args.tarball
+
+
+def mlst_st(sample: str) -> str:
+    """Sequence type of the pipeline's mlst run (scheme mycobacteria_2); '-' when mlst assigns none."""
+    f = args.assemblies / sample / "5_typing" / "mlst" / f"mlst_output_{sample}.tsv"
+    return str(f.read_text(encoding="utf-8").splitlines()[1].split("\t")[2])
 
 
 def species_label(sp: str) -> str:
@@ -31,15 +43,15 @@ def copy_fasta(src: Path, dst: Path) -> None:
     assert dst.stat().st_size > 0, src
 
 
-s = load_samples()
+s = load_samples(args.screening_map_results)
 s = s[s.keep]
-man = pd.read_csv(MANIFEST, sep="\t", dtype=str).set_index("sample")
+chk = pd.read_csv(args.screening_map_results, dtype=str).fillna("").set_index("PROBENNUMMER")["checkm_contamination"]
 rows: list[dict[str, object]] = []
 for sample, species, label in zip(s["sample"].astype(str), s["species"].astype(str), s["label"].astype(str)):
     name = safe_name(label) if label else sample.replace("Mkan329-", "M")
-    rows.append({"name": name, "sample": sample, "species": species_label(species), "mlst_ST": man.at[sample, "mlst_ST"],
-                 "checkm_contamination": man.at[sample, "checkm_contamination"], "is_control": bool(label),
-                 "is_reference": False, "src": ASSEMBLIES / f"{sample}.fasta"})
+    rows.append({"name": name, "sample": sample, "species": species_label(species), "mlst_ST": mlst_st(sample),
+                 "checkm_contamination": chk.at[sample], "is_control": bool(label),
+                 "is_reference": False, "src": assembly_fasta(sample, args.assemblies)})
 for acc, sp in REFERENCES.items():
     rows.append({"name": acc, "sample": acc, "species": species_label(sp), "mlst_ST": "", "checkm_contamination": "",
                  "is_control": False, "is_reference": True, "src": REF_FASTA / f"{acc}.fasta"})

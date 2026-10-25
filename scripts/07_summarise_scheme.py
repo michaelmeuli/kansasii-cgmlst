@@ -9,7 +9,7 @@ import re
 import pandas as pd
 
 from allele_distance import encode
-from common import CGMLST, EVAL, OUT
+from common import CGMLST, EVAL, OUTPUT
 
 html = (EVAL / "schema_report.html").read_text()
 m = re.search(r"preComputedData\s*=\s*(\{.*?\})\s*;?\s*</script>", html, flags=re.S)
@@ -21,7 +21,7 @@ flag_cols = ["Invalid Alleles", "Alleles < 201bp", "Alleles below threshold", "A
 flag_cols = [c for c in cols if c in flag_cols or c.startswith("Alleles <") or c.startswith("Alleles above")]
 flagged = loci[flag_cols].apply(pd.to_numeric, errors="coerce").fillna(0).sum(axis=1) > 0
 loci["good"] = ~flagged
-loci.to_csv(OUT / "schema_evaluator_loci.tsv", sep="\t", index=False)
+loci.to_csv(OUTPUT / "schema_evaluator_loci.tsv", sep="\t", index=False)
 n = len(loci)
 rows = [("loci evaluated", n), ("good targets (no flagged allele)", int((~flagged).sum())),
         ("good targets (%)", round(100 * (~flagged).mean(), 2))]
@@ -35,7 +35,7 @@ for t in ("1.0", "0.99", "0.95"):
     if f.exists():
         rows.append((f"cgMLST loci at >= {p}% presence", sum(1 for _ in f.open())))
 out = pd.DataFrame(rows, columns=["metric", "value"])
-out.to_csv(OUT / "scheme_summary.tsv", sep="\t", index=False)
+out.to_csv(OUTPUT / "scheme_summary.tsv", sep="\t", index=False)
 print(out.to_string(index=False))
 
 # per-genome estimate for screening_map_results.csv (immensekansasii 06): % of the cgMLST loci with an allele call
@@ -45,5 +45,5 @@ if tsv.exists():
     called = (encode(table) > 0).mean(axis=1) * 100
     qc = pd.DataFrame({"sample": [str(i).removesuffix(".fasta") for i in table.index],
                        "cgmlst_called_pct": called.round(2)}).sort_values("cgmlst_called_pct")
-    qc.to_csv(OUT / "sample_qc.tsv", sep="\t", index=False)
+    qc.to_csv(OUTPUT / "sample_qc.tsv", sep="\t", index=False)
     print(f"\nsample_qc.tsv: {len(qc)} genomes x {table.shape[1]} loci; lowest:\n{qc.head(5).to_string(index=False)}")

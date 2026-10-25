@@ -3,20 +3,24 @@ Writes allele_distance_<subset>.csv and shared_loci_<subset>.csv (loci called in
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
+
 import pandas as pd
 
 from allele_distance import encode, pairwise_deletion
-from common import CGMLST, OUT, REFERENCES, SUBSETS, load_samples
+from common import CGMLST, OUTPUT, REFERENCES, SUBSETS, load_samples
+from kansasii_paths import SCREENING_MAP_RESULTS
 
 ap = argparse.ArgumentParser()
+ap.add_argument("--screening-map-results", type=Path, default=SCREENING_MAP_RESULTS, help="source of the `excluded` column")
 ap.add_argument("--threshold", default="0.95", help="cgMLST threshold directory to use (t<threshold>)")
 args = ap.parse_args()
 
 tsv = CGMLST / f"t{args.threshold}" / f"cgMLST{round(float(args.threshold) * 100)}.tsv"
 table = pd.read_csv(tsv, sep="\t", index_col=0, dtype=str)
 table.index = pd.Index([str(i).removesuffix(".fasta") for i in table.index], name="sample")  # file names -> sample ids
-samples = pd.read_csv(OUT / "samples.tsv", sep="\t").set_index("sample")
-excluded = set(load_samples().query("excluded")["sample"])  # screening_map_results.csv: contaminated or < 90 % loci called
+samples = pd.read_csv(OUTPUT / "samples.tsv", sep="\t").set_index("sample")
+excluded = set(load_samples(args.screening_map_results).query("excluded")["sample"])  # screening_map_results.csv: contaminated or < 90 % loci called
 samples = samples[~samples.index.isin(excluded)]
 print(f"excluded from distances (`excluded` column): {sorted(excluded & set(table.index))}")
 missing = set(samples.index) - set(table.index)
@@ -24,7 +28,7 @@ if missing:  # genomes dropped by ExtractCgMLST (too many missing loci) -- repor
     print(f"WARNING {len(missing)} genomes not in the cgMLST table: {sorted(missing)}")
 samples = samples.loc[[s for s in samples.index if s in table.index]]
 table = table.loc[samples.index]
-mst_dir = OUT / "mst"
+mst_dir = OUTPUT / "mst"
 mst_dir.mkdir(exist_ok=True)
 for name, species in SUBSETS.items():
     keep = samples.index if species is None else samples.index[samples.species.isin(species)]

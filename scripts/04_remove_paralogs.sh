@@ -13,5 +13,5 @@ if [ -s "$WORK/paralogous_loci.txt" ]; then
 else
   cp "$RES/results_alleles.tsv" "$WORK/no_paralogs/results_alleles_noparalogs.tsv"
 fi
-cp "$WORK/paralogous_loci.txt" "$OUT/paralogous_loci.txt"
+cp "$WORK/paralogous_loci.txt" "$OUTPUT/paralogous_loci.txt"
 publish no_paralogs results_alleles_noparalogs.tsv
