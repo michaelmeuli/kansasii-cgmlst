@@ -54,8 +54,10 @@ genomes). Order: `STEPS=00:...:07` -> 06 -> `STEPS=08:09:10` (`run_downstream.sh
 |---|---|
 | loci in schema (seed) | 9,072 |
 | paralogous loci removed | 69 (9,003 remain) |
-| cgMLST loci, present in 100 % / 99 % / 95 % of genomes | 1,494 / 2,569 / **3,647** |
-| **good targets** (SchemaEvaluator: no flagged allele) | **3,596 / 3,647 = 98.6 %** (all alleles valid; 6 loci with an allele < 201 bp, 46 with an allele above the size threshold) |
+| cgMLST loci, present in 100 % / 99 % / 95 % of genomes | 1,494 / 2,569 / **3,646** |
+| **good targets** (SchemaEvaluator: no flagged allele) | **3,595 / 3,646 = 98.6 %** (all alleles valid; 6 loci with an allele < 201 bp, 46 with an allele above the size threshold) |
+
+The scheme was rebuilt on 2026-10-25 (chewBBACA `CreateSchema` is not bit-reproducible): 3,646 instead of 3,647 cgMLST95 loci and `cgmlst_called_pct` of 10 samples changed by <= 0.03 points; `excluded`, distance classes and MST node tables are unchanged.
 
 98.6 % is above the 95-98 % usually quoted for published schemes. Schema and cgMLST were defined on the same 182 genomes, so the
 95 % presence rule is satisfied by construction; validate on new isolates before treating the scheme as fixed.
@@ -65,7 +67,7 @@ genomes). Order: `STEPS=00:...:07` -> 06 -> `STEPS=08:09:10` (`run_downstream.sh
 As in Ridom, a locus counts for a pair of genomes only if both have an allele call. Everything that is not an allele id
 (LNF, NIPH, NIPHEM, ASM, ALM, PLOT3, PLOT5, LOTSC, 0 in the masked table) is missing. Distance = number of called-in-both loci with
 different alleles (no normalisation). `shared_loci_<subset>.csv` gives the number of loci compared per pair
-(minimum 3,136 of 3,647 in the complex). `tests/test_allele_distance.py` checks this against hand-computed values.
+(minimum 3,135 of 3,646 in the complex). `tests/test_allele_distance.py` checks this against hand-computed values.
 
 ## Figures (`output/cgmlst/mst/`)
 
