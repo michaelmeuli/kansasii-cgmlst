@@ -93,6 +93,7 @@ GCF_002086675.1: 117 (that public persicum genome is strain AFPC-000227, not DSM
 
 ## Caveats
 
+- Plasmid exclusion (details: [kansasii-docs/docs/PLASMIDS.md](../kansasii-docs/docs/PLASMIDS.md)): `strip_plasmids` runs on the 7 references only; the 175 cohort assemblies are used unstripped (step 00 line 44 vs. the genome loop above it), contrary to what the step-00 table row might suggest. None of the 3,646 cgMLST loci lies on pMK12478 or on MK142 `NZ_UPHU01000002.1` (checked 2026-10-29).
 - Only pMK12478 (labelled plasmid in the FASTA) is removed from the references. The 117 kb contig `NZ_UPHU01000002.1` of the pseudokansasii reference MK142 (conjugation genes, ESX cluster, no rRNA/tRNA; in 8 of 20 pseudokansasii and partly in 6 other isolates) is not labelled by NCBI and is kept on purpose.
 - Nearly every isolate has a unique profile, so nodes are single genomes and MST edge labels are large
   (tens to hundreds of alleles); this reflects strong recombination in the complex, and allele distances are not recombination-filtered.
