@@ -8,8 +8,7 @@ The chewBBACA working state (genome links, schemas, `schema_called`, per-locus r
 the scripts copy the result tables from there to `output/cgmlst/` (`publish` in `scripts/env.sh`).
 Run: `sbatch submit_all.sbatch` (env `env_cgmlst`, see `environment.yml`); `sbatch --export=ALL,STEPS=08:09:10 submit_all.sbatch` runs a subset (steps separated by `:`).
 Cohort assemblies are read from the pipeline results (`ASSEMBLIES/<sample>/1_unicycler/`, flag `--assemblies`), the 7 public references from
-`GTDB_REPRESENTATIVES` (flag `--gtdb-representatives`), the sample table from `SCREENING_MAP_RESULTS`; the former hand-made `output/ridom/` symlink
-directory is no longer read (the mlst sequence type comes from `ASSEMBLIES/<sample>/5_typing/mlst/`).
+`GTDB_REPRESENTATIVES` (flag `--gtdb-representatives`), the sample table from `SCREENING_MAP_RESULTS`; the mlst sequence type comes from `ASSEMBLIES/<sample>/5_typing/mlst/`).
 ## Layout
 
 ```
@@ -37,7 +36,7 @@ not the vendored copy (`bash repos/check_sync.sh --fix`).
 | 07 | `07_summarise_scheme.py` | good-target percentage -> `scheme_summary.tsv`, `schema_evaluator_loci.tsv` |
 | 08 | `08_distance_matrix.py` | pairwise-deletion allele distances (`allele_distance.py`) per subset |
 | 09 | `09_mst_figures.py` | MST figures |
-| 10 | `10_export_ridom.py` | `output/ridom_assemblies.tar.gz` (manifest `output/ridom_assemblies.MANIFEST.txt`) for Ridom SeqSphere+: the same QC-passing cohort + 7 references as real FASTA files (`ridom/assemblies/`); isolates named `M001` (as in the MST labels), control strains by `LABEL` (`M_kansasii_ATCC_12478`, ...), references by accession; `ridom/metadata.tsv` (name, sample, species as `M. kansasii` ..., ST, CheckM, flags) for the isolate-data import. Written to `.part` and renamed when complete (~20 min, run via sbatch) |
+| 10 | `10_export_ridom.py` | `output/ridom_assemblies.tar.gz` and `output/ridom_assemblies.zip` (same content; manifest `output/ridom_assemblies.MANIFEST.txt`) for Ridom SeqSphere+: the same QC-passing cohort + 7 references as real FASTA files (`ridom/assemblies/`); isolates named `M001` (as in the MST labels), control strains by `LABEL` (`M_kansasii_ATCC_12478`, ...), references by accession; `ridom/metadata.tsv` (name, sample, species as `M. kansasii` ..., ST, CheckM, flags) for the isolate-data import. Written to `.part` and renamed when complete (~20 min, run via sbatch) |
 
 ## Sample exclusion (`excluded`)
 

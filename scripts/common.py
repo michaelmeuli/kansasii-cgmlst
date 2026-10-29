@@ -17,6 +17,7 @@ CGMLST = WORK / "cgmlst"
 EVAL = WORK / "schema_evaluator"
 REF_FASTA = WORK / "reference_genomes"  # <accession>.fasta: the GTDB representatives without plasmid contigs (step 00)
 RIDOM_TARBALL = OUTPUT_ROOT / "ridom_assemblies.tar.gz"
+RIDOM_ZIP = OUTPUT_ROOT / "ridom_assemblies.zip"
 PTF = WORK / "ATCC12478.trn"  # Prodigal training file
 
 # public GTDB representatives (file stem, species); the first is the ATCC 12478 type strain of M. kansasii

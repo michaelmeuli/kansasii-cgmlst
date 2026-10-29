@@ -1,4 +1,4 @@
-"""Build output/ridom_assemblies.tar.gz for Ridom SeqSphere+: the QC-passing cohort assemblies (as real files, named M001; the
+"""Build output/ridom_assemblies.tar.gz and .zip (same content) for Ridom SeqSphere+: the QC-passing cohort assemblies (as real files, named M001; the
 ATCC/DSM control strains by their LABEL) + the 7 public reference genomes (named by accession), and metadata.tsv for the
 isolate-data import. Names match the node labels of the cgMLST MSTs (09_mst_figures.py)."""
 from __future__ import annotations
@@ -8,19 +8,22 @@ import re
 import shutil
 import tarfile
 import tempfile
+import zipfile
 from pathlib import Path
 
 import pandas as pd
 
-from common import REF_FASTA, REFERENCES, RIDOM_TARBALL, assembly_fasta, load_samples
+from common import REF_FASTA, REFERENCES, RIDOM_TARBALL, RIDOM_ZIP, assembly_fasta, load_samples
 from kansasii_paths import ASSEMBLIES, SCREENING_MAP_RESULTS
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--assemblies", type=Path, default=ASSEMBLIES, help="<sample>/1_unicycler/ and 5_typing/mlst/ per sample")
 ap.add_argument("--screening-map-results", type=Path, default=SCREENING_MAP_RESULTS, help="keep set and CheckM contamination")
 ap.add_argument("--tarball", type=Path, default=RIDOM_TARBALL)
+ap.add_argument("--zip", type=Path, default=RIDOM_ZIP)
 args = ap.parse_args()
 TARBALL: Path = args.tarball
+ZIPFILE: Path = args.zip
 
 
 def mlst_st(sample: str) -> str:
@@ -73,10 +76,20 @@ with tempfile.TemporaryDirectory(prefix="ridom_export_") as tmp:
             tf.add(f, arcname=f"ridom/assemblies/{f.name}")
         tf.add(top / "metadata.tsv", arcname="ridom/metadata.tsv")
     tmp_tar.replace(TARBALL)
+    tmp_zip = ZIPFILE.with_name(ZIPFILE.name + ".part")
+    with zipfile.ZipFile(tmp_zip, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in sorted((top / "assemblies").iterdir()):
+            zf.write(f, arcname=f"ridom/assemblies/{f.name}")
+        zf.write(top / "metadata.tsv", arcname="ridom/metadata.tsv")
+    tmp_zip.replace(ZIPFILE)
 
 with tarfile.open(TARBALL) as tf:  # verify
     fasta = [m for m in tf.getmembers() if m.name.endswith(".fasta")]
     assert all(m.isfile() and m.size > 0 for m in fasta), "link or empty file in tarball"
     assert len(fasta) == len(df), (len(fasta), len(df))
-print(f"{TARBALL}: {len(df)} genomes ({int(df.is_reference.sum())} references, {int(df.is_control.sum())} controls), "
+with zipfile.ZipFile(ZIPFILE) as zf:
+    zfasta = [i for i in zf.infolist() if i.filename.endswith(".fasta")]
+    assert all(i.file_size > 0 for i in zfasta), "empty file in zip"
+    assert sorted(i.filename for i in zfasta) == sorted(m.name for m in fasta), "zip and tarball differ"
+print(f"{TARBALL} + {ZIPFILE.name}: {len(df)} genomes ({int(df.is_reference.sum())} references, {int(df.is_control.sum())} controls), "
       f"{TARBALL.stat().st_size / 1e6:.1f} MB; species:\n{df.species.value_counts().to_string()}")
