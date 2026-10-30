@@ -1,4 +1,4 @@
-"""Build output/ridom_assemblies.tar.gz and .zip (same content) for Ridom SeqSphere+: the QC-passing cohort assemblies (as real files, named M001; the
+"""Build output/kansasii-cgmlst/ridom_assemblies.tar.gz and .zip (same content) for Ridom SeqSphere+: the QC-passing cohort assemblies (as real files, named M001; the
 ATCC/DSM control strains by their LABEL) + the 7 public reference genomes (named by accession), and metadata.tsv for the
 isolate-data import. Names match the node labels of the cgMLST MSTs (09_mst_figures.py)."""
 from __future__ import annotations

@@ -3,9 +3,9 @@
 cgMLST scheme for the *Mycobacterium kansasii* complex built with chewBBACA (3.5.4), and Ridom SeqSphere-style
 minimum spanning trees (MSTs) of the allele profiles. Complements `kansasii-mst` (core-SNP MSTs).
 
-Final tables and figures go to `output/cgmlst/` (`OUTPUT`; `KANSASII_ROOT` moves the whole tree), figures in `output/cgmlst/mst/`.
+Final tables and figures go to `output/kansasii-cgmlst/results/` (`OUTPUT`; `KANSASII_ROOT` moves the whole tree), figures in `output/kansasii-cgmlst/results/mst/`.
 The chewBBACA working state (genome links, schemas, `schema_called`, per-locus reports, `cds_coordinates.tsv`, logs; ~350 MB) lives in `runs/cgmlst/`;
-the scripts copy the result tables from there to `output/cgmlst/` (`publish` in `scripts/env.sh`).
+the scripts copy the result tables from there to `output/kansasii-cgmlst/results/` (`publish` in `scripts/env.sh`).
 Run: `sbatch submit_all.sbatch` (env `env_cgmlst`, see `environment.yml`); `sbatch --export=ALL,STEPS=08:09:10 submit_all.sbatch` runs a subset (steps separated by `:`).
 Cohort assemblies are read from the pipeline results (`ASSEMBLIES/<sample>/1_unicycler/`, flag `--assemblies`), the 7 public references from
 `GTDB_REPRESENTATIVES` (flag `--gtdb-representatives`), the sample table from `SCREENING_MAP_RESULTS`; the mlst sequence type comes from `ASSEMBLIES/<sample>/5_typing/mlst/`).
@@ -36,12 +36,12 @@ not the vendored copy (`bash repos/check_sync.sh --fix`).
 | 07 | `07_summarise_scheme.py` | good-target percentage -> `scheme_summary.tsv`, `schema_evaluator_loci.tsv` |
 | 08 | `08_distance_matrix.py` | pairwise-deletion allele distances (`allele_distance.py`) per subset |
 | 09 | `09_mst_figures.py` | MST figures |
-| 10 | `10_export_ridom.py` | `output/ridom_assemblies.tar.gz` and `output/ridom_assemblies.zip` (same content; manifest `output/ridom_assemblies.MANIFEST.txt`) for Ridom SeqSphere+: the same QC-passing cohort + 7 references as real FASTA files (`ridom/assemblies/`); isolates named `M001` (as in the MST labels), control strains by `LABEL` (`M_kansasii_ATCC_12478`, ...), references by accession; `ridom/metadata.tsv` (name, sample, species as `M. kansasii` ..., ST, CheckM, flags) for the isolate-data import. Written to `.part` and renamed when complete (~20 min, run via sbatch) |
+| 10 | `10_export_ridom.py` | `output/kansasii-cgmlst/ridom_assemblies.tar.gz` and `output/kansasii-cgmlst/ridom_assemblies.zip` (same content; manifest `output/kansasii-cgmlst/ridom_assemblies.MANIFEST.txt`) for Ridom SeqSphere+: the same QC-passing cohort + 7 references as real FASTA files (`ridom/assemblies/`); isolates named `M001` (as in the MST labels), control strains by `LABEL` (`M_kansasii_ATCC_12478`, ...), references by accession; `ridom/metadata.tsv` (name, sample, species as `M. kansasii` ..., ST, CheckM, flags) for the isolate-data import. Written to `.part` and renamed when complete (~20 min, run via sbatch) |
 
 ## Sample exclusion (`excluded`)
 
 Genomes that are allele-called (the *pool*: complex species, `contamination_flag` empty) define the scheme. Step 07 writes
-`output/cgmlst/sample_qc.tsv` (`cgmlst_called_pct`: % of the cgMLST95 loci with an allele call); immensekansasii
+`output/kansasii-cgmlst/results/sample_qc.tsv` (`cgmlst_called_pct`: % of the cgMLST95 loci with an allele call); immensekansasii
 `06_screening_map_results.py` copies it into `data/imm/screening_map_results.csv` and sets `excluded` = contaminated,
 `cgmlst_called_pct` < 90 (Ridom's good-target threshold) or a non-complex clinical sample (NR 184). Steps 08-10 (distances, MSTs, Ridom export) skip `excluded`
 genomes (`load_samples().keep`); the scheme itself still counts them in the 95 % presence rule (negligible: >= 173 of 182
@@ -68,7 +68,7 @@ As in Ridom, a locus counts for a pair of genomes only if both have an allele ca
 different alleles (no normalisation). `shared_loci_<subset>.csv` gives the number of loci compared per pair
 (minimum 3,135 of 3,646 in the complex). `tests/test_allele_distance.py` checks this against hand-computed values.
 
-## Figures (`output/cgmlst/mst/`)
+## Figures (`output/kansasii-cgmlst/results/mst/`)
 
 - `mst_cgmlst_complex.{png,pdf}`: whole complex incl. the public references (dashed ring).
 - `mst_cgmlst_kansasii.{png,pdf}`, `mst_cgmlst_persicum.{png,pdf}`, `mst_cgmlst_pseudokansasii.{png,pdf}`: one MST per species

@@ -2,7 +2,7 @@
 source "${KANSASII_ROOT:-/shares/sander.imm.uzh/MM/kansasii}/repos/kansasii-docs/templates/kansasii_paths.sh"
 export KANSASII_ROOT=$ROOT
 export PATH="$HOME/data/conda/envs/env_cgmlst/bin:$PATH"
-OUTPUT=$OUTPUT_ROOT/cgmlst   # final tables and figures only
+OUTPUT=$OUT_CGMLST/results   # final tables and figures only
 WORK=$RUNS/cgmlst            # chewBBACA working state
 mkdir -p "$OUTPUT" "$WORK"
 # publish DIR FILE...: copy the result tables FILE (relative to $WORK/DIR) into $OUTPUT/DIR

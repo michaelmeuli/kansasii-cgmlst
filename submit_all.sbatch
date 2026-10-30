@@ -24,7 +24,7 @@ for f in [0-9][0-9]_*; do
 done
 
 # provenance (see kansasii-docs/docs/PROVENANCE.md); the Ridom tarball is a loose file in output/
-bash "$MANIFEST_SCRIPT" "$OUTPUT_ROOT/cgmlst" "$REPO" submit_all.sbatch "$SCREENING_MAP_RESULTS" "$ASSEMBLIES" "$GTDB_REPRESENTATIVES" "STEPS=${STEPS:-all}"
+bash "$MANIFEST_SCRIPT" "$OUT_CGMLST/results" "$REPO" submit_all.sbatch "$SCREENING_MAP_RESULTS" "$ASSEMBLIES" "$GTDB_REPRESENTATIVES" "STEPS=${STEPS:-all}"
 if [[ " ${STEPS:-10} " == *" 10 "* ]]; then
-  MANIFEST_NAME=ridom_assemblies.MANIFEST.txt bash "$MANIFEST_SCRIPT" "$OUTPUT_ROOT" "$REPO" submit_all.sbatch "$SCREENING_MAP_RESULTS" "$ASSEMBLIES" "STEPS=${STEPS:-all}"
+  MANIFEST_NAME=ridom_assemblies.MANIFEST.txt bash "$MANIFEST_SCRIPT" "$OUT_CGMLST" "$REPO" submit_all.sbatch "$SCREENING_MAP_RESULTS" "$ASSEMBLIES" "STEPS=${STEPS:-all}"
 fi

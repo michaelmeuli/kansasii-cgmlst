@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from kansasii_paths import ASSEMBLIES, COMPLEX, OUTPUT_ROOT, RUNS, SCREENING_MAP_RESULTS
+from kansasii_paths import ASSEMBLIES, COMPLEX, OUT_CGMLST, RUNS, SCREENING_MAP_RESULTS
 
-OUTPUT = OUTPUT_ROOT / "cgmlst"  # final tables and figures only
+OUTPUT = OUT_CGMLST / "results"  # final tables and figures only
 WORK = RUNS / "cgmlst"  # chewBBACA working state (schemas, genome links, full reports)
 GENOMES = WORK / "genomes"  # symlinks <sample>.fasta, input of AlleleCall
 SEEDS = WORK / "seed_genomes"  # symlinks, input of CreateSchema
@@ -16,8 +16,8 @@ ALLELE_CALL = WORK / "allele_call"
 CGMLST = WORK / "cgmlst"
 EVAL = WORK / "schema_evaluator"
 REF_FASTA = WORK / "reference_genomes"  # <accession>.fasta: the GTDB representatives without plasmid contigs (step 00)
-RIDOM_TARBALL = OUTPUT_ROOT / "ridom_assemblies.tar.gz"
-RIDOM_ZIP = OUTPUT_ROOT / "ridom_assemblies.zip"
+RIDOM_TARBALL = OUT_CGMLST / "ridom_assemblies.tar.gz"
+RIDOM_ZIP = OUT_CGMLST / "ridom_assemblies.zip"
 PTF = WORK / "ATCC12478.trn"  # Prodigal training file
 
 # public GTDB representatives (file stem, species); the first is the ATCC 12478 type strain of M. kansasii

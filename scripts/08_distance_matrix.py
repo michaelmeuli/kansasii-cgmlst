@@ -1,5 +1,5 @@
 """Pairwise-deletion allele distance matrices of the final cgMLST table, for the whole table and per SUBSET.
-Writes allele_distance_<subset>.csv and shared_loci_<subset>.csv (loci called in both genomes of a pair) to output/cgmlst/mst/."""
+Writes allele_distance_<subset>.csv and shared_loci_<subset>.csv (loci called in both genomes of a pair) to output/kansasii-cgmlst/results/mst/."""
 from __future__ import annotations
 
 import argparse
