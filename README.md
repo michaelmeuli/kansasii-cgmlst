@@ -1,6 +1,6 @@
 # kansasii-cgmlst
 
-> **OBSOLETE (2026-10-30).** Superseded by Ridom SeqSphere+ as the source of truth for cgMLST, MST and clusters; not used for the final report. Only `scripts/10_export_ridom.py` (input for Ridom) and `sample_qc.tsv` (feeds `excluded`) are still in use; see `kansasii-docs/docs/RIDOM.md`. Do not extend.
+> **OBSOLETE (2026-10-30).** Superseded by Ridom SeqSphere+ as the source of truth for cgMLST, MST and clusters; not used for the final report. Only `sample_qc.tsv` (feeds `excluded`) is still in use (`scripts/10_export_ridom.py`, the input for Ridom, is superseded by `kansasii-ridom/scripts/01_export_ridom.py`, which adds M055); see `kansasii-docs/docs/RIDOM.md`. Do not extend.
 
 cgMLST scheme for the *Mycobacterium kansasii* complex built with chewBBACA (3.5.4), and Ridom SeqSphere-style
 minimum spanning trees (MSTs) of the allele profiles. Complements `kansasii-mst` (core-SNP MSTs).
