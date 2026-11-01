@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from kansasii_paths import COMPLEX, SCREENING_MAP_RESULTS as CSV  # noqa: E402
+from kansasii_paths import COHORT_SPECIES, SCREENING_MAP_RESULTS as CSV  # noqa: E402
 
 pytestmark = pytest.mark.skipif(not CSV.exists(), reason="screening_map_results.csv not available")
 
@@ -18,7 +18,7 @@ def load() -> pd.DataFrame:
     m = pd.read_csv(CSV, dtype=str).fillna("")
     assert "excluded" in m.columns and "cgmlst_called_pct" in m.columns, "rerun immensekansasii 06_screening_map_results.py"
     assert set(m.excluded) <= {"true", "false"}
-    return m[m.species.isin(COMPLEX)]
+    return m[m.species.isin(COHORT_SPECIES)]
 
 
 def test_only_m055_additionally_excluded() -> None:

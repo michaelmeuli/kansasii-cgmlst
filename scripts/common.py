@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from kansasii_paths import ASSEMBLIES, COMPLEX, OUT_CGMLST, RUNS, SCREENING_MAP_RESULTS
+from kansasii_paths import ASSEMBLIES, COHORT_SPECIES, OUT_CGMLST, RUNS, SCREENING_MAP_RESULTS
 
 OUTPUT = OUT_CGMLST / "results"  # final tables and figures only
 WORK = RUNS / "cgmlst"  # chewBBACA working state (schemas, genome links, full reports)
@@ -70,7 +70,7 @@ def load_samples(results: Path = SCREENING_MAP_RESULTS) -> pd.DataFrame:
     extra = [c for c in ("excluded", "cgmlst_called_pct") if c in pd.read_csv(path, nrows=0).columns]
     m = pd.read_csv(path, usecols=cols + extra, dtype={"excluded": str, "cgmlst_called_pct": str})
     pool_reason = pd.Series("", index=m.index)
-    pool_reason[~m.species.isin(COMPLEX)] = "not in complex"
+    pool_reason[~m.species.isin(COHORT_SPECIES)] = "not in complex"
     pool_reason[(m.contamination_flag == "contaminated") & (pool_reason == "")] = "contaminated"
     excluded = m["excluded"].fillna("").str.lower().eq("true") if "excluded" in m else pd.Series(False, index=m.index)
     pct = m["cgmlst_called_pct"].fillna("") if "cgmlst_called_pct" in m else pd.Series("", index=m.index)
