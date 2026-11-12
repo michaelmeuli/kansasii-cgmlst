@@ -47,7 +47,7 @@ Genomes that are allele-called (the *pool*: complex species, `contamination_flag
 `06_screening_map_results.py` copies it into `data/imm/screening_map_results.csv` and sets `excluded` = contaminated,
 `cgmlst_called_pct` < 90 (Ridom's good-target threshold) or a non-complex clinical sample (NR 184). Steps 08-10 (distances, MSTs, Ridom export) skip `excluded`
 genomes (`load_samples().keep`); the scheme itself still counts them in the 95 % presence rule (negligible: >= 173 of 182
-genomes). Order: `STEPS=00:...:07` -> 06 -> `STEPS=08:09:10` (`run_downstream.sh` does this). M055 (81.5 %) is the only isolate excluded by coverage.
+genomes). Order: `STEPS=00:...:07` -> 06 -> `STEPS=08:09:10` (`run_downstream.sh` does this, without step 10 since 2026-11-12). M055 (81.5 %) is the only isolate excluded by coverage.
 
 ## Scheme
 
