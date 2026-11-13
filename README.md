@@ -1,6 +1,6 @@
 # kansasii-cgmlst
 
-> **OBSOLETE (2026-10-30).** Superseded by Ridom SeqSphere+ as the source of truth for cgMLST, MST and clusters; not used for the final report. Only `sample_qc.tsv` (feeds `excluded`) is still in use (`scripts/10_export_ridom.py`, the input for Ridom, is superseded by `kansasii-ridom/scripts/01_export_ridom.py`, which adds M055); see `kansasii-docs/docs/RIDOM.md`. Do not extend.
+> **Not used for the final report.** Ridom SeqSphere+ is the source of truth for cgMLST, MST and clusters (`kansasii-docs/docs/RIDOM.md`). Of this repo's outputs only `sample_qc.tsv` is read (it feeds `excluded`). The input for Ridom is made by `kansasii-ridom/scripts/01_export_ridom.py`, not by `scripts/10_export_ridom.py`. Do not extend.
 
 cgMLST scheme for the *Mycobacterium kansasii* complex built with chewBBACA (3.5.4), and Ridom SeqSphere-style
 minimum spanning trees (MSTs) of the allele profiles. Complements `kansasii-mst` (core-SNP MSTs).
@@ -38,7 +38,7 @@ not the vendored copy (`bash repos/check_sync.sh --fix`).
 | 07 | `07_summarise_scheme.py` | good-target percentage -> `scheme_summary.tsv`, `schema_evaluator_loci.tsv` |
 | 08 | `08_distance_matrix.py` | pairwise-deletion allele distances (`allele_distance.py`) per subset |
 | 09 | `09_mst_figures.py` | MST figures |
-| 10 | `10_export_ridom.py` | `output/kansasii-cgmlst/ridom_assemblies.tar.gz` and `output/kansasii-cgmlst/ridom_assemblies.zip` (same content; manifest `output/kansasii-cgmlst/ridom_assemblies.MANIFEST.txt`) for Ridom SeqSphere+: the same QC-passing cohort + 7 references as real FASTA files (`ridom/assemblies/`); isolates named `M001` (as in the MST labels), control strains by `LABEL` (`M_kansasii_ATCC_12478`, ...), references by accession; `ridom/metadata.tsv` (name, sample, species as `M. kansasii` ..., ST, CheckM, flags) for the isolate-data import. Written to `.part` and renamed when complete (~20 min, run via sbatch) |
+| 10 | `10_export_ridom.py` | not run by `run_downstream.sh`, and its archive is not in `output/` (the Ridom input is `output/kansasii-ridom/ridom_assemblies.*`). When run it writes `output/kansasii-cgmlst/ridom_assemblies.tar.gz` and `output/kansasii-cgmlst/ridom_assemblies.zip` (same content; manifest `output/kansasii-cgmlst/ridom_assemblies.MANIFEST.txt`) for Ridom SeqSphere+: the `keep` cohort (174) + 7 references as real FASTA files (`ridom/assemblies/`); isolates named `M001` (as in the MST labels), control strains by `LABEL` (`M_kansasii_ATCC_12478`, ...), references by accession; `ridom/metadata.tsv` (name, sample, species as `M. kansasii` ..., ST, CheckM, flags) for the isolate-data import. Written to `.part` and renamed when complete (~20 min, run via sbatch) |
 
 ## Sample exclusion (`excluded`)
 
@@ -47,7 +47,7 @@ Genomes that are allele-called (the *pool*: complex species, `contamination_flag
 `06_screening_map_results.py` copies it into `data/imm/screening_map_results.csv` and sets `excluded` = contaminated,
 `cgmlst_called_pct` < 90 (Ridom's good-target threshold) or a non-complex clinical sample (NR 184). Steps 08-10 (distances, MSTs, Ridom export) skip `excluded`
 genomes (`load_samples().keep`); the scheme itself still counts them in the 95 % presence rule (negligible: >= 173 of 182
-genomes). Order: `STEPS=00:...:07` -> 06 -> `STEPS=08:09:10` (`run_downstream.sh` does this, without step 10 since 2026-11-12). M055 (81.5 %) is the only isolate excluded by coverage.
+genomes). Order: `STEPS=00:...:07` -> 06 -> `STEPS=08:09` (`run_downstream.sh` does this; step 10 only by hand). M055 (81.5 %) is the only isolate excluded by coverage.
 
 ## Scheme
 
@@ -58,7 +58,7 @@ genomes). Order: `STEPS=00:...:07` -> 06 -> `STEPS=08:09:10` (`run_downstream.sh
 | cgMLST loci, present in 100 % / 99 % / 95 % of genomes | 1,494 / 2,568 / **3,647** |
 | **good targets** (SchemaEvaluator: no flagged allele) | **3,596 / 3,647 = 98.6 %** (all alleles valid; 6 loci with an allele < 201 bp, 46 with an allele above the size threshold) |
 
-The scheme was rebuilt on 2026-10-25 and again on 2026-11-03 (chewBBACA `CreateSchema` is not bit-reproducible): the 2026-10-25 build had 3,646 cgMLST95 loci, the current one (2026-11-03) has 3,647 (as the first build); `cgmlst_called_pct` of 10 samples changed by <= 0.03 points between the first two builds, and `excluded`, distance classes and MST node tables were unchanged then (not rechecked for the third).
+The numbers are those of the build of 2026-11-03. chewBBACA `CreateSchema` is not bit-reproducible: a rebuild can differ by one cgMLST95 locus and by <= 0.03 points in `cgmlst_called_pct`, without a change in `excluded`.
 
 98.6 % is above the 95-98 % usually quoted for published schemes. Schema and cgMLST were defined on the same 182 genomes, so the
 95 % presence rule is satisfied by construction; validate on new isolates before treating the scheme as fixed.
@@ -95,7 +95,7 @@ GCF_002086675.1: 117 (that public persicum genome is strain AFPC-000227, not DSM
 
 ## Caveats
 
-- Plasmid exclusion (details: [kansasii-docs/docs/PLASMIDS.md](../kansasii-docs/docs/PLASMIDS.md)): `strip_plasmids` runs on the 7 references only; the 175 cohort assemblies are used unstripped (step 00 line 44 vs. the genome loop above it), contrary to what the step-00 table row might suggest. None of the 3,646 cgMLST loci of the 2026-10-25 build lies on pMK12478 or on MK142 `NZ_UPHU01000002.1` (checked 2026-10-29; not repeated for the 3,647 loci of the 2026-11-03 rebuild).
+- Plasmid exclusion (details: [kansasii-docs/docs/PLASMIDS.md](../kansasii-docs/docs/PLASMIDS.md)): `strip_plasmids` runs on the 7 references only; the 175 cohort assemblies are used unstripped (step 00 line 44 vs. the genome loop above it), contrary to what the step-00 table row might suggest. The check that no cgMLST locus lies on pMK12478 or on MK142 `NZ_UPHU01000002.1` was made on 2026-10-29 for a build with 3,646 loci and is not repeated for the current 3,647.
 - Only pMK12478 (labelled plasmid in the FASTA) is removed from the references. The 117 kb contig `NZ_UPHU01000002.1` of the pseudokansasii reference MK142 (conjugation genes, ESX cluster, no rRNA/tRNA; in 8 of 20 pseudokansasii and partly in 6 other isolates) is not labelled by NCBI and is kept on purpose.
 - Nearly every isolate has a unique profile, so nodes are single genomes and MST edge labels are large
   (tens to hundreds of alleles); this reflects strong recombination in the complex, and allele distances are not recombination-filtered.
