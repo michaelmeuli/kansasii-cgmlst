@@ -1,6 +1,6 @@
 # kansasii-cgmlst
 
-> **Not used for the final report.** Ridom SeqSphere+ is the source of truth for cgMLST, MST and clusters (`kansasii-docs/docs/RIDOM.md`). Of this repo's outputs only `sample_qc.tsv` is read (it feeds `excluded`). The input for Ridom is made by `kansasii-ridom/scripts/01_export_ridom.py`, not by `scripts/10_export_ridom.py`. Do not extend.
+> **Not used for the final report.** Ridom SeqSphere+ is the source of truth for cgMLST, MST and clusters (`kansasii-docs/docs/RIDOM.md`). Nothing reads this repo's outputs any more: `excluded` comes from Ridom's good-targets value since 2026-11-16, and `run_downstream.sh` does not run this repo. The input for Ridom is made by `kansasii-ridom/scripts/01_export_ridom.py`, not by `scripts/10_export_ridom.py`. Do not extend.
 
 cgMLST scheme for the *Mycobacterium kansasii* complex built with chewBBACA (3.5.4), and Ridom SeqSphere-style
 minimum spanning trees (MSTs) of the allele profiles. Complements `kansasii-mst` (core-SNP MSTs).
@@ -43,11 +43,11 @@ not the vendored copy (`bash repos/check_sync.sh --fix`).
 ## Sample exclusion (`excluded`)
 
 Genomes that are allele-called (the *pool*: complex species, `contamination_flag` empty) define the scheme. Step 07 writes
-`output/kansasii-cgmlst/results/sample_qc.tsv` (`cgmlst_called_pct`: % of the cgMLST95 loci with an allele call); immensekansasii
-`06_screening_map_results.py` copies it into `data/imm/screening_map_results.csv` and sets `excluded` = contaminated,
-`cgmlst_called_pct` < 90 (Ridom's good-target threshold) or a non-complex clinical sample (NR 184). Steps 08-10 (distances, MSTs, Ridom export) skip `excluded`
+`output/kansasii-cgmlst/results/sample_qc.tsv` (`cgmlst_called_pct`: % of the cgMLST95 loci with an allele call); it is no longer read.
+immensekansasii `06_screening_map_results.py` sets `excluded` in `data/imm/screening_map_results.csv` = contaminated,
+Ridom good targets < 90 % (`ridom_perc_good_targets`) or a non-complex clinical sample (NR 184). Steps 08-10 (distances, MSTs, Ridom export) skip `excluded`
 genomes (`load_samples().keep`); the scheme itself still counts them in the 95 % presence rule (negligible: >= 173 of 182
-genomes). Order: `STEPS=00:...:07` -> 06 -> `STEPS=08:09` (`run_downstream.sh` does this; step 10 only by hand). M055 (81.5 %) is the only isolate excluded by coverage.
+genomes). All steps are run by hand only (`run_downstream.sh` no longer submits them). M055 (79.4 % good targets in Ridom, 81.5 % of the chewBBACA loci) is the only isolate excluded by coverage.
 
 ## Scheme
 

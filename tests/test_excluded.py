@@ -1,4 +1,4 @@
-"""The `excluded` column of data/imm/screening_map_results.csv: contaminated or < 90 % of the cgMLST loci called.
+"""The `excluded` column of data/imm/screening_map_results.csv: contaminated or < 90 % good cgMLST targets in Ridom (ridom_perc_good_targets).
 Compared with the previous rule (contamination only), M055 must be the only additionally excluded complex isolate."""
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ pytestmark = pytest.mark.skipif(not CSV.exists(), reason="screening_map_results.
 
 def load() -> pd.DataFrame:
     m = pd.read_csv(CSV, dtype=str).fillna("")
-    assert "excluded" in m.columns and "cgmlst_called_pct" in m.columns, "rerun immensekansasii 06_screening_map_results.py"
+    assert "excluded" in m.columns and "ridom_perc_good_targets" in m.columns, "rerun immensekansasii 06_screening_map_results.py"
     assert set(m.excluded) <= {"true", "false"}
     return m[m.species.isin(COHORT_SPECIES)]
 
@@ -31,6 +31,6 @@ def test_only_m055_additionally_excluded() -> None:
 
 def test_threshold() -> None:
     m = load()
-    pct = pd.to_numeric(m.cgmlst_called_pct, errors="coerce")
+    pct = pd.to_numeric(m.ridom_perc_good_targets, errors="coerce")
     assert (m.excluded[pct < 90] == "true").all()
     assert (m.excluded[(pct >= 90) & (m.contamination_flag == "")] == "false").all()
